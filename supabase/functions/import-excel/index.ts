@@ -92,8 +92,15 @@ serve(async (req) => {
       if (!value) return null
       
       // Se já for uma string de horário (HH:MM)
-      if (typeof value === 'string' && value.includes(':')) {
-        return value
+      if (typeof value === 'string') {
+        // Se tiver múltiplos horários separados por /, pegar apenas o primeiro
+        if (value.includes('/')) {
+          value = value.split('/')[0].trim()
+        }
+        
+        if (value.includes(':')) {
+          return value
+        }
       }
       
       // Se for número serial do Excel (fração de dia)
@@ -205,7 +212,7 @@ serve(async (req) => {
       try {
         // Extrair dados das colunas corretas
         const numeroSequencial = row[0] ? String(row[0]).trim() : null
-        const status = row[1] ? String(row[1]).trim() : 'AGUARDANDO LAUDO'
+        const status = row[1] ? String(row[1]).trim().replace(/\s+/g, ' ') : 'AGUARDANDO LAUDO' // Normalizar espaços
         const cidade = row[2] ? String(row[2]).trim() : null
         const vara = row[3] ? String(row[3]).trim() : null
         const requerente = row[4] ? String(row[4]).trim() : null
