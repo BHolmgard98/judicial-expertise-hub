@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { STATUS_OPTIONS } from "@/lib/statusColors";
 
 interface NovaPericiaProps {
   onSuccess: () => void;
@@ -25,7 +26,7 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     requerido: "",
     vara: "",
     perito: "",
-    status: "Aguardando",
+    status: "AGUARDANDO PERÍCIA",
     data_nomeacao: new Date(),
     data_prazo: undefined as Date | undefined,
     honorarios: "",
@@ -136,11 +137,11 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Aguardando">Aguardando</SelectItem>
-              <SelectItem value="Em andamento">Em andamento</SelectItem>
-              <SelectItem value="Suspensa">Suspensa</SelectItem>
-              <SelectItem value="Concluída">Concluída</SelectItem>
-              <SelectItem value="Arquivada">Arquivada</SelectItem>
+              {STATUS_OPTIONS.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
