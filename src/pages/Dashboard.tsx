@@ -10,6 +10,7 @@ import StatusChart from "@/components/dashboard/StatusChart";
 import PrazosChart from "@/components/dashboard/PrazosChart";
 import PericiasTable from "@/components/dashboard/PericiasTable";
 import NovaPericia from "@/components/dashboard/NovaPericia";
+import ImportarPericias from "@/components/dashboard/ImportarPericias";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export interface FilterState {
@@ -75,6 +76,9 @@ const Dashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-6">
+          {/* Import Section */}
+          <ImportarPericias />
+
           {/* Filters */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
