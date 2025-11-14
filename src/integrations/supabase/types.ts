@@ -16,54 +16,102 @@ export type Database = {
     Tables: {
       pericias: {
         Row: {
+          cidade: string | null
           created_at: string | null
           data_entrega: string | null
+          data_esclarecimento: string | null
           data_nomeacao: string
+          data_pericia_agendada: string | null
           data_prazo: string | null
+          data_recebimento: string | null
+          email_reclamada: string | null
+          email_reclamante: string | null
+          endereco: string | null
+          funcao: string | null
           honorarios: number | null
+          horario: string | null
           id: string
+          nr15: number[] | null
+          nr16: number[] | null
+          numero: number | null
           numero_processo: string
           observacoes: string | null
           perito: string
+          prazo_esclarecimento: string | null
           requerente: string
           requerido: string
+          sentenca: string | null
           status: Database["public"]["Enums"]["pericia_status"] | null
           updated_at: string | null
           user_id: string | null
+          valor_causa: number | null
+          valor_recebimento: number | null
           vara: string
         }
         Insert: {
+          cidade?: string | null
           created_at?: string | null
           data_entrega?: string | null
+          data_esclarecimento?: string | null
           data_nomeacao: string
+          data_pericia_agendada?: string | null
           data_prazo?: string | null
+          data_recebimento?: string | null
+          email_reclamada?: string | null
+          email_reclamante?: string | null
+          endereco?: string | null
+          funcao?: string | null
           honorarios?: number | null
+          horario?: string | null
           id?: string
+          nr15?: number[] | null
+          nr16?: number[] | null
+          numero?: number | null
           numero_processo: string
           observacoes?: string | null
           perito: string
+          prazo_esclarecimento?: string | null
           requerente: string
           requerido: string
+          sentenca?: string | null
           status?: Database["public"]["Enums"]["pericia_status"] | null
           updated_at?: string | null
           user_id?: string | null
+          valor_causa?: number | null
+          valor_recebimento?: number | null
           vara: string
         }
         Update: {
+          cidade?: string | null
           created_at?: string | null
           data_entrega?: string | null
+          data_esclarecimento?: string | null
           data_nomeacao?: string
+          data_pericia_agendada?: string | null
           data_prazo?: string | null
+          data_recebimento?: string | null
+          email_reclamada?: string | null
+          email_reclamante?: string | null
+          endereco?: string | null
+          funcao?: string | null
           honorarios?: number | null
+          horario?: string | null
           id?: string
+          nr15?: number[] | null
+          nr16?: number[] | null
+          numero?: number | null
           numero_processo?: string
           observacoes?: string | null
           perito?: string
+          prazo_esclarecimento?: string | null
           requerente?: string
           requerido?: string
+          sentenca?: string | null
           status?: Database["public"]["Enums"]["pericia_status"] | null
           updated_at?: string | null
           user_id?: string | null
+          valor_causa?: number | null
+          valor_recebimento?: number | null
           vara?: string
         }
         Relationships: []

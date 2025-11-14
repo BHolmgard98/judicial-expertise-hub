@@ -3,12 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EditarPericia from "./EditarPericia";
+import VisualizarPericia from "./VisualizarPericia";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/statusColors";
 
@@ -19,6 +20,7 @@ interface PericiasTableProps {
 const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [pericias, setPericias] = useState<any[]>([]);
   const [editingPericia, setEditingPericia] = useState<any>(null);
+  const [viewingPericia, setViewingPericia] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -69,42 +71,47 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Nº</TableHead>
+                  <TableHead>Nº Vara</TableHead>
+                  <TableHead>Reclamante</TableHead>
                   <TableHead>Processo</TableHead>
-                  <TableHead>Requerente</TableHead>
-                  <TableHead>Requerido</TableHead>
-                  <TableHead>Vara</TableHead>
-                  <TableHead>Perito</TableHead>
+                  <TableHead>Reclamada</TableHead>
+                  <TableHead>Data de Nomeação</TableHead>
+                  <TableHead>Prazo de Entrega</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Nomeação</TableHead>
-                  <TableHead>Prazo</TableHead>
-                  <TableHead>Entrega</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pericias.map((pericia) => (
                   <TableRow key={pericia.id}>
-                    <TableCell className="font-medium">{pericia.numero_processo}</TableCell>
-                    <TableCell>{pericia.requerente}</TableCell>
-                    <TableCell>{pericia.requerido}</TableCell>
+                    <TableCell className="font-medium">{pericia.numero || "-"}</TableCell>
                     <TableCell>{pericia.vara}</TableCell>
-                    <TableCell>{pericia.perito}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(pericia.status)}>{pericia.status}</Badge>
-                    </TableCell>
+                    <TableCell>{pericia.requerente}</TableCell>
+                    <TableCell>{pericia.numero_processo}</TableCell>
+                    <TableCell>{pericia.requerido}</TableCell>
                     <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
                     <TableCell>
                       {pericia.data_prazo ? format(new Date(pericia.data_prazo), "dd/MM/yyyy") : "-"}
                     </TableCell>
                     <TableCell>
-                      {pericia.data_entrega ? format(new Date(pericia.data_entrega), "dd/MM/yyyy") : "-"}
+                      <Badge className={getStatusColor(pericia.status)}>{pericia.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
                         <Button
                           variant="outline"
                           size="icon"
+                          onClick={() => setViewingPericia(pericia)}
+                          title="Visualizar detalhes"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
                           onClick={() => setEditingPericia(pericia)}
+                          title="Editar"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -112,6 +119,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                           variant="destructive"
                           size="icon"
                           onClick={() => handleDelete(pericia.id)}
+                          title="Excluir"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -125,8 +133,14 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
         </CardContent>
       </Card>
 
+      <Dialog open={!!viewingPericia} onOpenChange={() => setViewingPericia(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {viewingPericia && <VisualizarPericia pericia={viewingPericia} />}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!editingPericia} onOpenChange={() => setEditingPericia(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {editingPericia && (
             <EditarPericia
               pericia={editingPericia}
