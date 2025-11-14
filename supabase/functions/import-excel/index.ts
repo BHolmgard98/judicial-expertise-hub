@@ -151,14 +151,27 @@ serve(async (req) => {
       try {
         // Extrair dados das colunas corretas
         const numeroProcesso = row[4] ? String(row[4]).trim() : null
-        const requerente = row[3] ? String(row[3]).trim() : null
-        const requerido = row[6] ? String(row[6]).trim() : null
+        const cidade = row[1] ? String(row[1]).trim() : null
         const vara = row[2] ? String(row[2]).trim() : null
-        const dataNomeacao = parseDate(row[27])  // Coluna 27
-        const dataPrazo = parseDate(row[33])     // Coluna 33
-        const dataEntrega = parseDate(row[34])    // Coluna 34
-        const honorarios = parseHonorarios(row[49]) // Coluna 49
-        const observacoes = row[50] ? String(row[50]).trim() : null // Coluna 50
+        const requerente = row[3] ? String(row[3]).trim() : null
+        const funcao = row[5] ? String(row[5]).trim() : null
+        const requerido = row[6] ? String(row[6]).trim() : null
+        const valorCausa = parseHonorarios(row[7])
+        const dataNomeacao = parseDate(row[27])
+        const dataPericiaAgendada = parseDate(row[28])
+        const horario = row[29] ? String(row[29]).trim() : null
+        const endereco = row[30] ? String(row[30]).trim() : null
+        const emailReclamante = row[31] ? String(row[31]).trim() : null
+        const emailReclamada = row[32] ? String(row[32]).trim() : null
+        const dataPrazo = parseDate(row[33])
+        const dataEntrega = parseDate(row[34])
+        const prazoEsclarecimento = parseDate(row[35])
+        const dataEsclarecimento = parseDate(row[36])
+        const dataRecebimento = parseDate(row[37])
+        const valorRecebimento = parseHonorarios(row[38])
+        const honorarios = parseHonorarios(row[49])
+        const sentenca = row[50] ? String(row[50]).trim() : null
+        const observacoes = row[51] ? String(row[51]).trim() : null
 
         // Validar apenas os campos realmente obrigatórios no banco
         if (!numeroProcesso || !requerente || !requerido || !vara) {
