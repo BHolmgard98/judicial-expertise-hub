@@ -12,6 +12,12 @@ import PericiasTable from "@/components/dashboard/PericiasTable";
 import NovaPericia from "@/components/dashboard/NovaPericia";
 import ImportarPericias from "@/components/dashboard/ImportarPericias";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NomeacoesPorVaraChart from "@/components/dashboard/charts/NomeacoesPorVaraChart";
+import AnexosNRChart from "@/components/dashboard/charts/AnexosNRChart";
+import PrazoEntregaChart from "@/components/dashboard/charts/PrazoEntregaChart";
+import RecebimentoPorMesChart from "@/components/dashboard/charts/RecebimentoPorMesChart";
+import RecebidoAReceberChart from "@/components/dashboard/charts/RecebidoAReceberChart";
 
 export interface FilterState {
   status: string;
@@ -105,6 +111,44 @@ const Dashboard = () => {
             <StatusChart filters={filters} />
             <PrazosChart filters={filters} />
           </div>
+
+          {/* Analytics Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Análises e Estatísticas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="varas" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="varas">Varas</TabsTrigger>
+                  <TabsTrigger value="nrs">NRs</TabsTrigger>
+                  <TabsTrigger value="prazos">Prazos</TabsTrigger>
+                  <TabsTrigger value="recebimentos">Recebimentos</TabsTrigger>
+                  <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="varas">
+                  <NomeacoesPorVaraChart />
+                </TabsContent>
+                
+                <TabsContent value="nrs">
+                  <AnexosNRChart />
+                </TabsContent>
+                
+                <TabsContent value="prazos">
+                  <PrazoEntregaChart />
+                </TabsContent>
+                
+                <TabsContent value="recebimentos">
+                  <RecebimentoPorMesChart />
+                </TabsContent>
+                
+                <TabsContent value="financeiro">
+                  <RecebidoAReceberChart />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
 
           {/* Table */}
           <PericiasTable filters={filters} />
