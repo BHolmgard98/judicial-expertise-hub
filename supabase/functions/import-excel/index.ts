@@ -88,6 +88,27 @@ serve(async (req) => {
       return null
     }
 
+    const parseTime = (value: any): string | null => {
+      if (!value) return null
+      
+      // Se já for uma string de horário (HH:MM)
+      if (typeof value === 'string' && value.includes(':')) {
+        return value
+      }
+      
+      // Se for número serial do Excel (fração de dia)
+      if (typeof value === 'number') {
+        // Excel armazena tempo como fração de 1 dia
+        // Ex: 0.5 = 12:00, 0.25 = 06:00
+        const totalMinutes = Math.round(value * 24 * 60)
+        const hours = Math.floor(totalMinutes / 60)
+        const minutes = totalMinutes % 60
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`
+      }
+      
+      return null
+    }
+
     const parseHonorarios = (value: any): number | null => {
       if (!value) return null
       
@@ -105,19 +126,20 @@ serve(async (req) => {
       return null
     }
 
-    const parseNRArray = (value: any): number[] | null => {
-      if (!value) return null
+    const parseNRArray = (startCol: number, endCol: number, row: any[]): number[] | null => {
+      const numbers: number[] = []
       
-      if (typeof value === 'string') {
-        const numbers = value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n))
-        return numbers.length > 0 ? numbers : null
+      for (let col = startCol; col <= endCol; col++) {
+        const value = row[col]
+        if (value) {
+          // Se for número, adiciona o índice (col - startCol + 1)
+          if (typeof value === 'number' || value === 1 || value === '1') {
+            numbers.push(col - startCol + 1)
+          }
+        }
       }
       
-      if (typeof value === 'number') {
-        return [value]
-      }
-      
-      return null
+      return numbers.length > 0 ? numbers : null
     }
 
     const extractHyperlink = (sheet: any, row: number, col: number): string | null => {
@@ -154,8 +176,11 @@ serve(async (req) => {
     const errors = []
 
     // Mapeamento correto das colunas do Excel:
-    // 0=Nº, 1=Cidade, 2=Nº Vara, 3=Reclamante, 4=Nº do Processo, 5=Função, 6=Reclamada
-    // 27=Data de nomeação, 33=Prazo entrega, 34=Data entrega, 49=Honorários, 50=Sentença
+    // 0=Nº, 1=Status, 2=Cidade, 3=Nº Vara, 4=Reclamante, 5=Nº do Processo (com hiperlink), 6=Função, 7=Reclamada, 8=Valor da causa
+    // 9-22=NR15 (14 colunas), 23-27=NR16 (5 colunas)
+    // 28=Data nomeação, 29=Data perícia agendada, 30=Horário, 31=Endereço, 32=E-mail Reclamante, 33=E-mail Reclamada
+    // 34=Prazo entrega, 35=Data entrega, 36=Prazo esclarecimento, 37=Data esclarecimento
+    // 48=Data recebimento, 49=Valor Recebimento, 50=Honorários, 51=Sentença, 52=Observação
     
     // Encontrar a linha do cabeçalho (procura por "Nº do Processo")
     let headerRow = 0
@@ -179,31 +204,33 @@ serve(async (req) => {
 
       try {
         // Extrair dados das colunas corretas
-        const numeroProcesso = row[4] ? String(row[4]).trim() : null
-        const linkProcesso = extractHyperlink(firstSheet, i, 4) // Extrair hiperlink da coluna do número do processo
-        const cidade = row[1] ? String(row[1]).trim() : null
-        const vara = row[2] ? String(row[2]).trim() : null
-        const requerente = row[3] ? String(row[3]).trim() : null
-        const funcao = row[5] ? String(row[5]).trim() : null
-        const requerido = row[6] ? String(row[6]).trim() : null
-        const valorCausa = parseHonorarios(row[7])
-        const nr15 = parseNRArray(row[8])
-        const nr16 = parseNRArray(row[9])
-        const dataNomeacao = parseDate(row[27])
-        const dataPericiaAgendada = parseDate(row[28])
-        const horario = row[29] ? String(row[29]).trim() : null
-        const endereco = row[30] ? String(row[30]).trim() : null
-        const emailReclamante = row[31] ? String(row[31]).trim() : null
-        const emailReclamada = row[32] ? String(row[32]).trim() : null
-        const dataPrazo = parseDate(row[33])
-        const dataEntrega = parseDate(row[34])
-        const prazoEsclarecimento = parseDate(row[35])
-        const dataEsclarecimento = parseDate(row[36])
-        const dataRecebimento = parseDate(row[37])
-        const valorRecebimento = parseHonorarios(row[38])
-        const honorarios = parseHonorarios(row[49])
-        const sentenca = row[50] ? String(row[50]).trim() : null
-        const observacoes = row[51] ? String(row[51]).trim() : null
+        const numeroSequencial = row[0] ? String(row[0]).trim() : null
+        const status = row[1] ? String(row[1]).trim() : 'AGUARDANDO LAUDO'
+        const cidade = row[2] ? String(row[2]).trim() : null
+        const vara = row[3] ? String(row[3]).trim() : null
+        const requerente = row[4] ? String(row[4]).trim() : null
+        const numeroProcesso = row[5] ? String(row[5]).trim() : null
+        const linkProcesso = extractHyperlink(firstSheet, i, 5) // Extrair hiperlink da coluna 5
+        const funcao = row[6] ? String(row[6]).trim() : null
+        const requerido = row[7] ? String(row[7]).trim() : null
+        const valorCausa = parseHonorarios(row[8])
+        const nr15 = parseNRArray(9, 22, row) // Colunas 9-22 para NR15 (índices 1-14)
+        const nr16 = parseNRArray(23, 27, row) // Colunas 23-27 para NR16 (índices 1-5)
+        const dataNomeacao = parseDate(row[28])
+        const dataPericiaAgendada = parseDate(row[29])
+        const horario = parseTime(row[30])
+        const endereco = row[31] ? String(row[31]).trim() : null
+        const emailReclamante = row[32] ? String(row[32]).trim() : null
+        const emailReclamada = row[33] ? String(row[33]).trim() : null
+        const dataPrazo = parseDate(row[34])
+        const dataEntrega = parseDate(row[35])
+        const prazoEsclarecimento = parseDate(row[36])
+        const dataEsclarecimento = parseDate(row[37])
+        const dataRecebimento = parseDate(row[48])
+        const valorRecebimento = parseHonorarios(row[49])
+        const honorarios = parseHonorarios(row[50])
+        const sentenca = row[51] ? String(row[51]).trim() : null
+        const observacoes = row[52] ? String(row[52]).trim() : null
 
         // Validar apenas os campos realmente obrigatórios no banco
         if (!numeroProcesso || !requerente || !requerido || !vara) {
@@ -213,8 +240,6 @@ serve(async (req) => {
         
         // Se não tiver data de nomeação, usar a data atual
         const finalDataNomeacao = dataNomeacao || new Date().toISOString().split('T')[0]
-
-        const status = determineStatus(dataEntrega, observacoes)
 
         const { error } = await supabaseClient
           .from('pericias')
