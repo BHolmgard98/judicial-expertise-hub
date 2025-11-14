@@ -120,33 +120,54 @@ serve(async (req) => {
       return 'AGUARDANDO LAUDO'
     }
 
-    // Processar linhas (assumindo que a primeira linha é cabeçalho)
+    // Processar linhas (linha 0 é cabeçalho baseado na estrutura do Excel)
     const results = []
     const errors = []
 
-    // Mapeamento das colunas (ajuste conforme seu Excel)
-    // Exemplo: coluna 0 = Nº, coluna 4 = Nº do Processo, etc.
-    for (let i = 1; i < jsonData.length; i++) {
+    // Mapeamento correto das colunas do Excel:
+    // 0=Nº, 1=Cidade, 2=Nº Vara, 3=Reclamante, 4=Nº do Processo, 5=Função, 6=Reclamada
+    // 27=Data de nomeação, 33=Prazo entrega, 34=Data entrega, 49=Honorários, 50=Sentença
+    
+    // Encontrar a linha do cabeçalho (procura por "Nº do Processo")
+    let headerRow = 0
+    for (let i = 0; i < Math.min(20, jsonData.length); i++) {
+      const row = jsonData[i] as any[]
+      if (row && row.some((cell: any) => String(cell).includes('Nº do Processo'))) {
+        headerRow = i
+        console.log(`Header found at row ${i}`)
+        break
+      }
+    }
+
+    for (let i = headerRow + 1; i < jsonData.length; i++) {
       const row = jsonData[i] as any[]
       
-      // Pular linhas vazias
-      if (!row || row.length === 0 || !row[4]) continue
+      // Pular linhas vazias ou linhas sem número de processo
+      if (!row || row.length === 0) {
+        console.log(`Linha ${i + 1}: Linha vazia`)
+        continue
+      }
 
       try {
+        // Extrair dados das colunas corretas
         const numeroProcesso = row[4] ? String(row[4]).trim() : null
         const requerente = row[3] ? String(row[3]).trim() : null
         const requerido = row[6] ? String(row[6]).trim() : null
         const vara = row[2] ? String(row[2]).trim() : null
-        const dataNomeacao = parseDate(row[19])
-        const dataPrazo = parseDate(row[25])
-        const dataEntrega = parseDate(row[26])
-        const honorarios = parseHonorarios(row[40])
-        const observacoes = row[41] ? String(row[41]).trim() : null
+        const dataNomeacao = parseDate(row[27])  // Coluna 27
+        const dataPrazo = parseDate(row[33])     // Coluna 33
+        const dataEntrega = parseDate(row[34])    // Coluna 34
+        const honorarios = parseHonorarios(row[49]) // Coluna 49
+        const observacoes = row[50] ? String(row[50]).trim() : null // Coluna 50
 
-        if (!numeroProcesso || !requerente || !requerido || !vara || !dataNomeacao) {
-          console.log(`Linha ${i + 1}: Dados obrigatórios faltando`)
+        // Validar apenas os campos realmente obrigatórios no banco
+        if (!numeroProcesso || !requerente || !requerido || !vara) {
+          console.log(`Linha ${i + 1}: Dados obrigatórios faltando - Processo: ${numeroProcesso}, Req: ${requerente}, Reqdo: ${requerido}, Vara: ${vara}`)
           continue
         }
+        
+        // Se não tiver data de nomeação, usar a data atual
+        const finalDataNomeacao = dataNomeacao || new Date().toISOString().split('T')[0]
 
         const status = determineStatus(dataEntrega, observacoes)
 
@@ -159,7 +180,7 @@ serve(async (req) => {
             vara: vara,
             perito: 'Engº Arthur Reis',
             status: status,
-            data_nomeacao: dataNomeacao,
+            data_nomeacao: finalDataNomeacao,
             data_prazo: dataPrazo,
             data_entrega: dataEntrega,
             honorarios: honorarios,
