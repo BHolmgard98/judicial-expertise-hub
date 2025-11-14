@@ -22,7 +22,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [pericias, setPericias] = useState<any[]>([]);
   const [editingPericia, setEditingPericia] = useState<any>(null);
   const [viewingPericia, setViewingPericia] = useState<any>(null);
-  const [sortColumn, setSortColumn] = useState<"data_nomeacao" | "data_prazo" | null>(null);
+  const [sortColumn, setSortColumn] = useState<"numero" | "vara" | "data_nomeacao" | "data_prazo" | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedPericias, setSelectedPericias] = useState<Set<string>>(new Set());
   const { toast } = useToast();
@@ -50,7 +50,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     if (data) setPericias(data);
   };
 
-  const handleSort = (column: "data_nomeacao" | "data_prazo") => {
+  const handleSort = (column: "numero" | "vara" | "data_nomeacao" | "data_prazo") => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -59,7 +59,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     }
   };
 
-  const getSortIcon = (column: "data_nomeacao" | "data_prazo") => {
+  const getSortIcon = (column: "numero" | "vara" | "data_nomeacao" | "data_prazo") => {
     if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-1" />;
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
   };
@@ -157,8 +157,24 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
-                  <TableHead>Nº</TableHead>
-                  <TableHead>Nº Vara</TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort("numero")}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      Nº
+                      {getSortIcon("numero")}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort("vara")}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      Nº Vara
+                      {getSortIcon("vara")}
+                    </button>
+                  </TableHead>
                   <TableHead>Reclamante</TableHead>
                   <TableHead>Processo</TableHead>
                   <TableHead>Reclamada</TableHead>
