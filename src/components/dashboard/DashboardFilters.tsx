@@ -42,12 +42,12 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <div className="space-y-2">
         <Label>Status</Label>
-        <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
+        <Select value={filters.status || "all"} onValueChange={(value) => setFilters({ ...filters, status: value === "all" ? "" : value })}>
           <SelectTrigger>
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {statusOptions.map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
@@ -59,12 +59,12 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
 
       <div className="space-y-2">
         <Label>Perito</Label>
-        <Select value={filters.perito} onValueChange={(value) => setFilters({ ...filters, perito: value })}>
+        <Select value={filters.perito || "all"} onValueChange={(value) => setFilters({ ...filters, perito: value === "all" ? "" : value })}>
           <SelectTrigger>
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {peritoOptions.map((perito) => (
               <SelectItem key={perito} value={perito}>
                 {perito}
@@ -76,12 +76,12 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
 
       <div className="space-y-2">
         <Label>Vara</Label>
-        <Select value={filters.vara} onValueChange={(value) => setFilters({ ...filters, vara: value })}>
+        <Select value={filters.vara || "all"} onValueChange={(value) => setFilters({ ...filters, vara: value === "all" ? "" : value })}>
           <SelectTrigger>
             <SelectValue placeholder="Todas" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             {varaOptions.map((vara) => (
               <SelectItem key={vara} value={vara}>
                 {vara}
