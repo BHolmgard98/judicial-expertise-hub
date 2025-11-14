@@ -10,6 +10,7 @@ import { FilterState } from "@/pages/Dashboard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EditarPericia from "./EditarPericia";
 import { Badge } from "@/components/ui/badge";
+import { getStatusColor } from "@/lib/statusColors";
 
 interface PericiasTableProps {
   filters: FilterState;
@@ -57,21 +58,6 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "Concluída":
-        return "default";
-      case "Em andamento":
-        return "secondary";
-      case "Aguardando":
-        return "outline";
-      case "Suspensa":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
   return (
     <>
       <Card>
@@ -104,7 +90,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                     <TableCell>{pericia.vara}</TableCell>
                     <TableCell>{pericia.perito}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(pericia.status)}>{pericia.status}</Badge>
+                      <Badge className={getStatusColor(pericia.status)}>{pericia.status}</Badge>
                     </TableCell>
                     <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
                     <TableCell>

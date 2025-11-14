@@ -82,6 +82,19 @@ export type Database = {
         | "Suspensa"
         | "Concluída"
         | "Arquivada"
+        | "FINALIZADO EM ACORDO ANTES DA PERÍCIA"
+        | "AGENDAR PERÍCIA"
+        | "AGUARDANDO PERÍCIA"
+        | "AGUARDANDO LAUDO"
+        | "AGUARDANDO ESCLARECIMENTOS"
+        | "LAUDO/ESCLARECIMENTOS ENTREGUES"
+        | "SENTENÇA"
+        | "RECURSO ORDINÁRIO"
+        | "ACORDO APÓS REALIZAÇÃO DA PERÍCIA"
+        | "CERTIDÃO DE TRÂNSITO EM JULGADO"
+        | "SOLICITAÇÃO DE PAGAMENTO DE HONORÁRIOS"
+        | "HONORÁRIOS RECEBIDOS"
+        | "REFAZER A PERÍCIA - ORDEM JUDICIAL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -215,6 +228,19 @@ export const Constants = {
         "Suspensa",
         "Concluída",
         "Arquivada",
+        "FINALIZADO EM ACORDO ANTES DA PERÍCIA",
+        "AGENDAR PERÍCIA",
+        "AGUARDANDO PERÍCIA",
+        "AGUARDANDO LAUDO",
+        "AGUARDANDO ESCLARECIMENTOS",
+        "LAUDO/ESCLARECIMENTOS ENTREGUES",
+        "SENTENÇA",
+        "RECURSO ORDINÁRIO",
+        "ACORDO APÓS REALIZAÇÃO DA PERÍCIA",
+        "CERTIDÃO DE TRÂNSITO EM JULGADO",
+        "SOLICITAÇÃO DE PAGAMENTO DE HONORÁRIOS",
+        "HONORÁRIOS RECEBIDOS",
+        "REFAZER A PERÍCIA - ORDEM JUDICIAL",
       ],
     },
   },
