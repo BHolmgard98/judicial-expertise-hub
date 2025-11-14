@@ -47,10 +47,10 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer()
     const data = new Uint8Array(arrayBuffer)
     
-    // Processar o Excel
-    const workbook = XLSX.read(data, { type: 'array' })
+    // Processar o Excel com suporte a hiperlinks
+    const workbook = XLSX.read(data, { type: 'array', cellStyles: true })
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
-    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 })
+    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: null })
 
     console.log('Excel parsed, rows:', jsonData.length)
 
@@ -105,6 +105,35 @@ serve(async (req) => {
       return null
     }
 
+    const parseNRArray = (value: any): number[] | null => {
+      if (!value) return null
+      
+      if (typeof value === 'string') {
+        const numbers = value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n))
+        return numbers.length > 0 ? numbers : null
+      }
+      
+      if (typeof value === 'number') {
+        return [value]
+      }
+      
+      return null
+    }
+
+    const extractHyperlink = (sheet: any, row: number, col: number): string | null => {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col })
+      const cell = sheet[cellAddress]
+      
+      if (!cell) return null
+      
+      // Tentar extrair hiperlink da célula
+      if (cell.l && cell.l.Target) {
+        return cell.l.Target
+      }
+      
+      return null
+    }
+
     const determineStatus = (dataEntrega: string | null, observacoes: string | null): string => {
       if (observacoes && observacoes.toLowerCase().includes('acordo')) {
         if (dataEntrega) {
@@ -151,13 +180,15 @@ serve(async (req) => {
       try {
         // Extrair dados das colunas corretas
         const numeroProcesso = row[4] ? String(row[4]).trim() : null
-        const linkProcesso = row[52] ? String(row[52]).trim() : null
+        const linkProcesso = extractHyperlink(firstSheet, i, 4) // Extrair hiperlink da coluna do número do processo
         const cidade = row[1] ? String(row[1]).trim() : null
         const vara = row[2] ? String(row[2]).trim() : null
         const requerente = row[3] ? String(row[3]).trim() : null
         const funcao = row[5] ? String(row[5]).trim() : null
         const requerido = row[6] ? String(row[6]).trim() : null
         const valorCausa = parseHonorarios(row[7])
+        const nr15 = parseNRArray(row[8])
+        const nr16 = parseNRArray(row[9])
         const dataNomeacao = parseDate(row[27])
         const dataPericiaAgendada = parseDate(row[28])
         const horario = row[29] ? String(row[29]).trim() : null
@@ -194,7 +225,10 @@ serve(async (req) => {
             requerente: requerente,
             funcao: funcao,
             requerido: requerido,
+            vara: vara,
             valor_causa: valorCausa,
+            nr15: nr15,
+            nr16: nr16,
             perito: 'Engº Arthur Reis',
             status: status,
             data_nomeacao: finalDataNomeacao,
