@@ -151,6 +151,7 @@ serve(async (req) => {
       try {
         // Extrair dados das colunas corretas
         const numeroProcesso = row[4] ? String(row[4]).trim() : null
+        const linkProcesso = row[52] ? String(row[52]).trim() : null
         const cidade = row[1] ? String(row[1]).trim() : null
         const vara = row[2] ? String(row[2]).trim() : null
         const requerente = row[3] ? String(row[3]).trim() : null
@@ -188,15 +189,28 @@ serve(async (req) => {
           .from('pericias')
           .insert({
             numero_processo: numeroProcesso,
+            link_processo: linkProcesso,
+            cidade: cidade,
             requerente: requerente,
+            funcao: funcao,
             requerido: requerido,
-            vara: vara,
+            valor_causa: valorCausa,
             perito: 'Engº Arthur Reis',
             status: status,
             data_nomeacao: finalDataNomeacao,
+            data_pericia_agendada: dataPericiaAgendada,
+            horario: horario,
+            endereco: endereco,
+            email_reclamante: emailReclamante,
+            email_reclamada: emailReclamada,
             data_prazo: dataPrazo,
             data_entrega: dataEntrega,
+            prazo_esclarecimento: prazoEsclarecimento,
+            data_esclarecimento: dataEsclarecimento,
+            data_recebimento: dataRecebimento,
+            valor_recebimento: valorRecebimento,
             honorarios: honorarios,
+            sentenca: sentenca,
             observacoes: observacoes,
             user_id: user.id,
           })

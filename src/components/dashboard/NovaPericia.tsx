@@ -27,6 +27,7 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
   
   const [formData, setFormData] = useState({
     numero_processo: "",
+    link_processo: "",
     cidade: "",
     vara: "",
     requerente: "",
@@ -75,6 +76,7 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
 
       const { error } = await supabase.from("pericias").insert({
         numero_processo: formData.numero_processo,
+        link_processo: formData.link_processo || null,
         cidade: formData.cidade || null,
         vara: formData.vara,
         requerente: formData.requerente,
@@ -139,6 +141,17 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
                 value={formData.numero_processo}
                 onChange={(e) => setFormData({ ...formData, numero_processo: e.target.value })}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="link_processo">Link do Processo</Label>
+              <Input
+                id="link_processo"
+                type="url"
+                placeholder="https://..."
+                value={formData.link_processo}
+                onChange={(e) => setFormData({ ...formData, link_processo: e.target.value })}
               />
             </div>
 
