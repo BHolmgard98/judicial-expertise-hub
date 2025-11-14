@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
@@ -21,14 +21,16 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [pericias, setPericias] = useState<any[]>([]);
   const [editingPericia, setEditingPericia] = useState<any>(null);
   const [viewingPericia, setViewingPericia] = useState<any>(null);
+  const [sortColumn, setSortColumn] = useState<"data_nomeacao" | "data_prazo" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const { toast } = useToast();
 
   useEffect(() => {
     fetchPericias();
-  }, [filters]);
+  }, [filters, sortColumn, sortDirection]);
 
   const fetchPericias = async () => {
-    let query = supabase.from("pericias").select("*").order("created_at", { ascending: false });
+    let query = supabase.from("pericias").select("*");
 
     if (filters.status) query = query.eq("status", filters.status as any);
     if (filters.perito) query = query.eq("perito", filters.perito);
@@ -36,8 +38,28 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     if (filters.dateFrom) query = query.gte("data_nomeacao", filters.dateFrom.toISOString());
     if (filters.dateTo) query = query.lte("data_nomeacao", filters.dateTo.toISOString());
 
+    if (sortColumn) {
+      query = query.order(sortColumn, { ascending: sortDirection === "asc" });
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
+
     const { data } = await query;
     if (data) setPericias(data);
+  };
+
+  const handleSort = (column: "data_nomeacao" | "data_prazo") => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("desc");
+    }
+  };
+
+  const getSortIcon = (column: "data_nomeacao" | "data_prazo") => {
+    if (sortColumn !== column) return <ArrowUpDown className="w-4 h-4 ml-1" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
   };
 
   const handleDelete = async (id: string) => {
@@ -76,8 +98,24 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                   <TableHead>Reclamante</TableHead>
                   <TableHead>Processo</TableHead>
                   <TableHead>Reclamada</TableHead>
-                  <TableHead>Data de Nomeação</TableHead>
-                  <TableHead>Prazo de Entrega</TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort("data_nomeacao")}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      Data de Nomeação
+                      {getSortIcon("data_nomeacao")}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort("data_prazo")}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      Prazo de Entrega
+                      {getSortIcon("data_prazo")}
+                    </button>
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
