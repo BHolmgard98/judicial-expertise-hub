@@ -28,6 +28,7 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
   
   const [formData, setFormData] = useState({
     numero_processo: pericia.numero_processo,
+    link_processo: pericia.link_processo || "",
     cidade: pericia.cidade || "",
     vara: pericia.vara,
     requerente: pericia.requerente,
@@ -74,6 +75,7 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
         .from("pericias")
         .update({
           numero_processo: formData.numero_processo,
+          link_processo: formData.link_processo || null,
           cidade: formData.cidade || null,
           vara: formData.vara,
           requerente: formData.requerente,
@@ -138,6 +140,17 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
                 value={formData.numero_processo}
                 onChange={(e) => setFormData({ ...formData, numero_processo: e.target.value })}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="link_processo">Link do Processo</Label>
+              <Input
+                id="link_processo"
+                type="url"
+                placeholder="https://..."
+                value={formData.link_processo}
+                onChange={(e) => setFormData({ ...formData, link_processo: e.target.value })}
               />
             </div>
 

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
@@ -88,7 +88,22 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                     <TableCell className="font-medium">{pericia.numero || "-"}</TableCell>
                     <TableCell>{pericia.vara}</TableCell>
                     <TableCell>{pericia.requerente}</TableCell>
-                    <TableCell>{pericia.numero_processo}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {pericia.link_processo && (
+                          <a
+                            href={pericia.link_processo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary/80"
+                            title="Abrir link do processo"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        <span>{pericia.numero_processo}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{pericia.requerido}</TableCell>
                     <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
                     <TableCell>

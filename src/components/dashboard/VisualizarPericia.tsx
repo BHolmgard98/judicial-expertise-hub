@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/statusColors";
+import { ExternalLink } from "lucide-react";
 
 interface VisualizarPericiaProps {
   pericia: any;
@@ -51,7 +52,20 @@ const VisualizarPericia = ({ pericia }: VisualizarPericiaProps) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Número do Processo</label>
-              <p className="text-base">{pericia.numero_processo}</p>
+              <div className="flex items-center gap-2">
+                {pericia.link_processo && (
+                  <a
+                    href={pericia.link_processo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-primary/80"
+                    title="Abrir link do processo"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                <p className="text-base">{pericia.numero_processo}</p>
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Cidade</label>

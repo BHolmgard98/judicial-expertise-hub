@@ -31,6 +31,7 @@ export type Database = {
           honorarios: number | null
           horario: string | null
           id: string
+          link_processo: string | null
           nr15: number[] | null
           nr16: number[] | null
           numero: number | null
@@ -64,6 +65,7 @@ export type Database = {
           honorarios?: number | null
           horario?: string | null
           id?: string
+          link_processo?: string | null
           nr15?: number[] | null
           nr16?: number[] | null
           numero?: number | null
@@ -97,6 +99,7 @@ export type Database = {
           honorarios?: number | null
           horario?: string | null
           id?: string
+          link_processo?: string | null
           nr15?: number[] | null
           nr16?: number[] | null
           numero?: number | null
