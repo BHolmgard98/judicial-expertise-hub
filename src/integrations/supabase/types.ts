@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pericias: {
+        Row: {
+          created_at: string | null
+          data_entrega: string | null
+          data_nomeacao: string
+          data_prazo: string | null
+          honorarios: number | null
+          id: string
+          numero_processo: string
+          observacoes: string | null
+          perito: string
+          requerente: string
+          requerido: string
+          status: Database["public"]["Enums"]["pericia_status"] | null
+          updated_at: string | null
+          user_id: string | null
+          vara: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_entrega?: string | null
+          data_nomeacao: string
+          data_prazo?: string | null
+          honorarios?: number | null
+          id?: string
+          numero_processo: string
+          observacoes?: string | null
+          perito: string
+          requerente: string
+          requerido: string
+          status?: Database["public"]["Enums"]["pericia_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          vara: string
+        }
+        Update: {
+          created_at?: string | null
+          data_entrega?: string | null
+          data_nomeacao?: string
+          data_prazo?: string | null
+          honorarios?: number | null
+          id?: string
+          numero_processo?: string
+          observacoes?: string | null
+          perito?: string
+          requerente?: string
+          requerido?: string
+          status?: Database["public"]["Enums"]["pericia_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          vara?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +76,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      pericia_status:
+        | "Aguardando"
+        | "Em andamento"
+        | "Suspensa"
+        | "Concluída"
+        | "Arquivada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +208,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      pericia_status: [
+        "Aguardando",
+        "Em andamento",
+        "Suspensa",
+        "Concluída",
+        "Arquivada",
+      ],
+    },
   },
 } as const
