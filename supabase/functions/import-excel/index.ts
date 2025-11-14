@@ -99,6 +99,11 @@ serve(async (req) => {
         }
         
         if (value.includes(':')) {
+          // Adicionar segundos se não tiver
+          const parts = value.split(':')
+          if (parts.length === 2) {
+            return `${value}:00`
+          }
           return value
         }
       }
@@ -212,7 +217,16 @@ serve(async (req) => {
       try {
         // Extrair dados das colunas corretas
         const numeroSequencial = row[0] ? String(row[0]).trim() : null
-        const status = row[1] ? String(row[1]).trim().replace(/\s+/g, ' ') : 'AGUARDANDO LAUDO' // Normalizar espaços
+        // Normalizar espaços - remover todos os tipos de espaços múltiplos
+        const rawStatus = row[1] ? String(row[1]).trim() : 'AGUARDANDO LAUDO'
+        const status = rawStatus
+          .replace(/\s+/g, ' ')           // Espaços normais múltiplos
+          .replace(/\u00A0+/g, ' ')       // Non-breaking spaces
+          .replace(/\u202F+/g, ' ')       // Narrow non-breaking spaces
+          .trim()
+        
+        console.log(`Linha ${i + 1}: Status original: "${rawStatus}", Status normalizado: "${status}"`)
+        
         const cidade = row[2] ? String(row[2]).trim() : null
         const vara = row[3] ? String(row[3]).trim() : null
         const requerente = row[4] ? String(row[4]).trim() : null
