@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import EditarPericia from "./EditarPericia";
 import VisualizarPericia from "./VisualizarPericia";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [viewingPericia, setViewingPericia] = useState<any>(null);
   const [sortColumn, setSortColumn] = useState<"data_nomeacao" | "data_prazo" | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [selectedPericias, setSelectedPericias] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,6 +64,56 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1" /> : <ArrowDown className="w-4 h-4 ml-1" />;
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPericias(new Set(pericias.map(p => p.id)));
+    } else {
+      setSelectedPericias(new Set());
+    }
+  };
+
+  const handleSelectPericia = (id: string, checked: boolean) => {
+    const newSelected = new Set(selectedPericias);
+    if (checked) {
+      newSelected.add(id);
+    } else {
+      newSelected.delete(id);
+    }
+    setSelectedPericias(newSelected);
+  };
+
+  const handleCopyRoute = async () => {
+    const selectedPericiasData = pericias.filter(p => selectedPericias.has(p.id));
+    const enderecos = selectedPericiasData
+      .filter(p => p.endereco && p.endereco.trim() !== "")
+      .map(p => p.endereco);
+
+    if (enderecos.length === 0) {
+      toast({
+        title: "Nenhum endereço encontrado",
+        description: "As perícias selecionadas não possuem endereços cadastrados",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const rotaText = enderecos.join(" / ");
+    
+    try {
+      await navigator.clipboard.writeText(rotaText);
+      toast({
+        title: "Rota copiada!",
+        description: `${enderecos.length} endereço(s) copiado(s) para a área de transferência`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar os endereços",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta perícia?")) return;
 
@@ -85,14 +137,26 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Perícias Registradas</CardTitle>
+          {selectedPericias.size > 1 && (
+            <Button onClick={handleCopyRoute} variant="outline">
+              <MapPin className="w-4 h-4 mr-2" />
+              Copiar Rota ({selectedPericias.size})
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedPericias.size === pericias.length && pericias.length > 0}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>Nº</TableHead>
                   <TableHead>Nº Vara</TableHead>
                   <TableHead>Reclamante</TableHead>
@@ -123,6 +187,12 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
               <TableBody>
                 {pericias.map((pericia) => (
                   <TableRow key={pericia.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPericias.has(pericia.id)}
+                        onCheckedChange={(checked) => handleSelectPericia(pericia.id, checked as boolean)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{pericia.numero || "-"}</TableCell>
                     <TableCell>{pericia.vara}</TableCell>
                     <TableCell>{pericia.requerente}</TableCell>
