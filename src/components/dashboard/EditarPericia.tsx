@@ -71,6 +71,11 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
     setLoading(true);
 
     try {
+      // Detecta se houve mudança de status de "AGENDAR PERÍCIA" para "AGUARDANDO PERÍCIA"
+      const shouldSyncCalendar = 
+        pericia.status === "AGENDAR PERÍCIA" && 
+        formData.status === "AGUARDANDO PERÍCIA";
+
       const { error } = await supabase
         .from("pericias")
         .update({
@@ -106,10 +111,51 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
 
       if (error) throw error;
 
-      toast({
-        title: "Perícia atualizada",
-        description: "As alterações foram salvas com sucesso",
-      });
+      // Se deve sincronizar com Google Calendar
+      if (shouldSyncCalendar) {
+        try {
+          const { error: calendarError } = await supabase.functions.invoke('google-calendar-sync', {
+            body: {
+              requerente: formData.requerente,
+              requerido: formData.requerido,
+              data_pericia_agendada: formData.data_pericia_agendada?.toISOString().split('T')[0],
+              horario: formData.horario,
+              endereco: formData.endereco,
+              observacoes: formData.observacoes,
+              link_processo: formData.link_processo,
+              funcao: formData.funcao,
+              nr15: nr15Selected,
+              nr16: nr16Selected,
+            }
+          });
+
+          if (calendarError) {
+            console.error('Erro ao sincronizar com Google Calendar:', calendarError);
+            toast({
+              title: "Perícia atualizada",
+              description: "Perícia salva, mas houve erro ao sincronizar com Google Calendar",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Perícia atualizada e agendada",
+              description: "As alterações foram salvas e o evento foi criado no Google Calendar",
+            });
+          }
+        } catch (calendarError: any) {
+          console.error('Erro ao sincronizar com Google Calendar:', calendarError);
+          toast({
+            title: "Perícia atualizada",
+            description: "Perícia salva, mas houve erro ao sincronizar com Google Calendar",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Perícia atualizada",
+          description: "As alterações foram salvas com sucesso",
+        });
+      }
 
       onSuccess();
     } catch (error: any) {
