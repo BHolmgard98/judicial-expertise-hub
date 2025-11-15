@@ -100,32 +100,26 @@ ${equipment}`.trim();
 async function createCalendarEvent(pericia: PericiaData) {
   const accessToken = await getAccessToken();
 
-  // Combine data e horário de forma mais robusta
-  const [year, month, day] = pericia.data_pericia_agendada.split('-');
-  const [hours, minutes] = (pericia.horario || '09:00').split(':');
+  // Formata data e horário no formato correto para o Google Calendar
+  // Formato: YYYY-MM-DDTHH:MM:SS (sem Z, para respeitar o timezone)
+  const timeString = (pericia.horario || '09:00').substring(0, 5); // Pega apenas HH:MM
+  const startDateTime = `${pericia.data_pericia_agendada}T${timeString}:00`;
   
-  const startDate = new Date(
-    parseInt(year),
-    parseInt(month) - 1, // Mês é 0-indexed
-    parseInt(day),
-    parseInt(hours),
-    parseInt(minutes)
-  );
-
-  // Calcula o fim do evento (2 horas depois)
-  const endDate = new Date(startDate);
-  endDate.setHours(endDate.getHours() + 2);
+  // Calcula horário de término (2 horas depois)
+  const [hours, minutes] = timeString.split(':');
+  const endHour = (parseInt(hours) + 2).toString().padStart(2, '0');
+  const endDateTime = `${pericia.data_pericia_agendada}T${endHour}:${minutes}:00`;
 
   const event = {
     summary: `PERÍCIA - ${pericia.requerente}`,
     location: pericia.endereco || '',
     description: buildEventDescription(pericia),
     start: {
-      dateTime: startDate.toISOString(),
+      dateTime: startDateTime,
       timeZone: 'America/Sao_Paulo',
     },
     end: {
-      dateTime: endDate.toISOString(),
+      dateTime: endDateTime,
       timeZone: 'America/Sao_Paulo',
     },
   };
