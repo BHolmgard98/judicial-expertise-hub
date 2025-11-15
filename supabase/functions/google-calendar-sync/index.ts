@@ -19,8 +19,8 @@ interface PericiaData {
 }
 
 async function getAccessToken() {
-  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
-  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  const clientId = Deno.env.get('GOOGLE_CLIENTE_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENTE_SECRET');
   const refreshToken = Deno.env.get('GOOGLE_REFRESH_TOKEN');
 
   if (!clientId || !clientSecret || !refreshToken) {
