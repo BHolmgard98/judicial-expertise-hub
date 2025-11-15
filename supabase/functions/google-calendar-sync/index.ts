@@ -100,23 +100,32 @@ ${equipment}`.trim();
 async function createCalendarEvent(pericia: PericiaData) {
   const accessToken = await getAccessToken();
 
-  // Combine data e horário
-  const dateTime = `${pericia.data_pericia_agendada}T${pericia.horario || '09:00'}:00`;
+  // Combine data e horário de forma mais robusta
+  const [year, month, day] = pericia.data_pericia_agendada.split('-');
+  const [hours, minutes] = (pericia.horario || '09:00').split(':');
   
+  const startDate = new Date(
+    parseInt(year),
+    parseInt(month) - 1, // Mês é 0-indexed
+    parseInt(day),
+    parseInt(hours),
+    parseInt(minutes)
+  );
+
   // Calcula o fim do evento (2 horas depois)
-  const endDateTime = new Date(dateTime);
-  endDateTime.setHours(endDateTime.getHours() + 2);
+  const endDate = new Date(startDate);
+  endDate.setHours(endDate.getHours() + 2);
 
   const event = {
     summary: `PERÍCIA - ${pericia.requerente}`,
     location: pericia.endereco || '',
     description: buildEventDescription(pericia),
     start: {
-      dateTime: dateTime,
+      dateTime: startDate.toISOString(),
       timeZone: 'America/Sao_Paulo',
     },
     end: {
-      dateTime: endDateTime.toISOString(),
+      dateTime: endDate.toISOString(),
       timeZone: 'America/Sao_Paulo',
     },
   };
