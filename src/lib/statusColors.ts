@@ -1,33 +1,27 @@
-// Status color mapping based on the provided image
+// Status color mapping with new order and colors
 export const getStatusColor = (status: string): string => {
   const colorMap: Record<string, string> = {
+    'AGENDAR PERÍCIA': 'bg-yellow-400 text-black',
+    'AGUARDANDO PERÍCIA': 'bg-amber-100 text-black',
+    'AGUARDANDO LAUDO': 'bg-orange-600 text-white',
+    'AGUARDANDO ESCLARECIMENTOS': 'bg-sky-300 text-black',
+    'LAUDO/ESCLARECIMENTOS ENTREGUES': 'bg-green-500 text-white',
+    'SENTENÇA': 'bg-blue-900 text-white',
+    'RECURSO ORDINÁRIO': 'bg-gray-400 text-black',
+    'ACORDO APÓS REALIZAÇÃO DA PERÍCIA': 'bg-rose-800 text-white',
     'FINALIZADO EM ACORDO ANTES DA PERÍCIA': 'bg-red-600 text-white',
-    'REFAZER A PERÍCIA - ORDEM JUDICIAL': 'bg-red-600 text-white',
-    'AGENDAR PERÍCIA': 'bg-yellow-300 text-black',
-    'AGUARDANDO PERÍCIA': 'bg-yellow-300 text-black',
-    'AGUARDANDO LAUDO': 'bg-yellow-300 text-black',
-    'AGUARDANDO ESCLARECIMENTOS': 'bg-blue-400 text-white',
-    'LAUDO/ESCLARECIMENTOS ENTREGUES': 'bg-blue-400 text-white',
-    'SENTENÇA': 'bg-blue-400 text-white',
-    'ACORDO APÓS REALIZAÇÃO DA PERÍCIA': 'bg-orange-400 text-black',
-    'CERTIDÃO DE TRÂNSITO EM JULGADO': 'bg-gray-300 text-black',
+    'CERTIDÃO DE TRÂNSITO EM JULGADO': 'bg-orange-300 text-black',
     'SOLICITAÇÃO DE PAGAMENTO DE HONORÁRIOS': 'bg-purple-400 text-white',
-    'HONORÁRIOS RECEBIDOS': 'bg-green-400 text-black',
-    'RECURSO ORDINÁRIO': 'bg-white text-black border-2 border-gray-800',
-    // Old statuses (fallback)
-    'Aguardando': 'bg-yellow-300 text-black',
-    'Em andamento': 'bg-blue-400 text-white',
-    'Suspensa': 'bg-orange-400 text-black',
-    'Concluída': 'bg-green-400 text-black',
-    'Arquivada': 'bg-gray-300 text-black',
+    'HONORÁRIOS RECEBIDOS': 'bg-green-800 text-white',
+    'REFAZER A PERÍCIA - ORDEM JUDICIAL': 'bg-yellow-400 text-black',
   };
   
   return colorMap[status] || 'bg-muted text-muted-foreground';
 };
 
 export const STATUS_OPTIONS = [
-  'AGUARDANDO PERÍCIA',
   'AGENDAR PERÍCIA',
+  'AGUARDANDO PERÍCIA',
   'AGUARDANDO LAUDO',
   'AGUARDANDO ESCLARECIMENTOS',
   'LAUDO/ESCLARECIMENTOS ENTREGUES',
