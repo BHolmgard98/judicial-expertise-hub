@@ -7,7 +7,7 @@ import { LogOut, Plus, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import StatusChart from "@/components/dashboard/StatusChart";
-import PrazosChart from "@/components/dashboard/PrazosChart";
+
 import PericiasTable from "@/components/dashboard/PericiasTable";
 import NovaPericia from "@/components/dashboard/NovaPericia";
 import ImportarPericias from "@/components/dashboard/ImportarPericias";
@@ -21,10 +21,10 @@ import RecebidoAReceberChart from "@/components/dashboard/charts/RecebidoARecebe
 
 export interface FilterState {
   status: string;
-  perito: string;
+  requerente: string;
   vara: string;
-  dateFrom: Date | undefined;
-  dateTo: Date | undefined;
+  nr15: number[];
+  nr16: number[];
 }
 
 const Dashboard = () => {
@@ -32,10 +32,10 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [filters, setFilters] = useState<FilterState>({
     status: "",
-    perito: "",
+    requerente: "",
     vara: "",
-    dateFrom: undefined,
-    dateTo: undefined,
+    nr15: [],
+    nr16: [],
   });
   const [open, setOpen] = useState(false);
 
@@ -107,10 +107,7 @@ const Dashboard = () => {
           </Card>
 
           {/* Charts */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <StatusChart filters={filters} />
-            <PrazosChart filters={filters} />
-          </div>
+          <StatusChart filters={filters} />
 
           {/* Analytics Section */}
           <Card>

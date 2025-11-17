@@ -23,10 +23,10 @@ const StatusChart = ({ filters }: StatusChartProps) => {
       .select("status");
 
     if (filters.status) query = query.eq("status", filters.status as any);
-    if (filters.perito) query = query.eq("perito", filters.perito);
     if (filters.vara) query = query.eq("vara", filters.vara);
-    if (filters.dateFrom) query = query.gte("data_nomeacao", filters.dateFrom.toISOString());
-    if (filters.dateTo) query = query.lte("data_nomeacao", filters.dateTo.toISOString());
+    if (filters.requerente) query = query.ilike("requerente", `%${filters.requerente}%`);
+    if (filters.nr15.length > 0) query = query.overlaps("nr15", filters.nr15);
+    if (filters.nr16.length > 0) query = query.overlaps("nr16", filters.nr16);
 
     const { data: pericias } = await query;
 

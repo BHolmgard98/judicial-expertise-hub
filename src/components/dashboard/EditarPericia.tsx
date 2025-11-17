@@ -106,6 +106,7 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
           honorarios: formData.honorarios ? parseFloat(formData.honorarios) : null,
           sentenca: formData.sentenca || null,
           observacoes: formData.observacoes || null,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", pericia.id);
 
@@ -520,16 +521,6 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
         <div className="space-y-4">
           <h3 className="font-semibold text-lg border-b pb-2">Informações Adicionais</h3>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="perito">Perito *</Label>
-              <Input
-                id="perito"
-                value={formData.perito}
-                onChange={(e) => setFormData({ ...formData, perito: e.target.value })}
-                required
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>

@@ -34,8 +34,8 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     funcao: "",
     requerido: "",
     valor_causa: "",
-    perito: "",
-    status: "AGUARDANDO PERÍCIA",
+    perito: "Engº Arthur Reis",
+    status: "AGENDAR PERÍCIA",
     data_nomeacao: new Date(),
     data_pericia_agendada: undefined as Date | undefined,
     horario: "",
@@ -475,16 +475,6 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
         <div className="space-y-4">
           <h3 className="font-semibold text-lg border-b pb-2">Informações Adicionais</h3>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="perito">Perito *</Label>
-              <Input
-                id="perito"
-                value={formData.perito}
-                onChange={(e) => setFormData({ ...formData, perito: e.target.value })}
-                required
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
