@@ -23,6 +23,10 @@ interface PericiaExport {
   valor_causa?: number;
   honorarios?: number;
   valor_recebimento?: number;
+  deslocamento?: string;
+  estacao?: string;
+  linha_numero?: string;
+  linha_cor?: string;
   observacoes?: string;
 }
 
@@ -91,6 +95,10 @@ export const exportToExcel = async (
     { header: "NR16", key: "nr16", width: 20 },
     { header: "Cidade", key: "cidade", width: 18 },
     { header: "Endereço", key: "endereco", width: 30 },
+    { header: "Deslocamento", key: "deslocamento", width: 18 },
+    { header: "Estação", key: "estacao", width: 20 },
+    { header: "Nº Linha", key: "linha_numero", width: 15 },
+    { header: "Cor", key: "linha_cor", width: 12 },
     { header: "Função", key: "funcao", width: 18 },
     { header: "Perito", key: "perito", width: 20 },
     { header: "Valor da Causa", key: "valor_causa", width: 15 },
@@ -129,6 +137,10 @@ export const exportToExcel = async (
       nr16: pericia.nr16 ? pericia.nr16.join(", ") : "-",
       cidade: pericia.cidade || "-",
       endereco: pericia.endereco || "-",
+      deslocamento: pericia.deslocamento || "-",
+      estacao: pericia.estacao || "-",
+      linha_numero: pericia.linha_numero || "-",
+      linha_cor: pericia.linha_cor || "-",
       funcao: pericia.funcao || "-",
       perito: pericia.perito,
       valor_causa: pericia.valor_causa ? formatCurrency(pericia.valor_causa) : "-",

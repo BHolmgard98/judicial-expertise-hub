@@ -24,13 +24,17 @@ export type Database = {
           data_pericia_agendada: string | null
           data_prazo: string | null
           data_recebimento: string | null
+          deslocamento: string | null
           email_reclamada: string | null
           email_reclamante: string | null
           endereco: string | null
+          estacao: string | null
           funcao: string | null
           honorarios: number | null
           horario: string | null
           id: string
+          linha_cor: string | null
+          linha_numero: string | null
           link_processo: string | null
           nr15: number[] | null
           nr16: number[] | null
@@ -41,7 +45,6 @@ export type Database = {
           prazo_esclarecimento: string | null
           requerente: string
           requerido: string
-          sentenca: string | null
           status: Database["public"]["Enums"]["pericia_status"] | null
           updated_at: string | null
           user_id: string | null
@@ -58,13 +61,17 @@ export type Database = {
           data_pericia_agendada?: string | null
           data_prazo?: string | null
           data_recebimento?: string | null
+          deslocamento?: string | null
           email_reclamada?: string | null
           email_reclamante?: string | null
           endereco?: string | null
+          estacao?: string | null
           funcao?: string | null
           honorarios?: number | null
           horario?: string | null
           id?: string
+          linha_cor?: string | null
+          linha_numero?: string | null
           link_processo?: string | null
           nr15?: number[] | null
           nr16?: number[] | null
@@ -75,7 +82,6 @@ export type Database = {
           prazo_esclarecimento?: string | null
           requerente: string
           requerido: string
-          sentenca?: string | null
           status?: Database["public"]["Enums"]["pericia_status"] | null
           updated_at?: string | null
           user_id?: string | null
@@ -92,13 +98,17 @@ export type Database = {
           data_pericia_agendada?: string | null
           data_prazo?: string | null
           data_recebimento?: string | null
+          deslocamento?: string | null
           email_reclamada?: string | null
           email_reclamante?: string | null
           endereco?: string | null
+          estacao?: string | null
           funcao?: string | null
           honorarios?: number | null
           horario?: string | null
           id?: string
+          linha_cor?: string | null
+          linha_numero?: string | null
           link_processo?: string | null
           nr15?: number[] | null
           nr16?: number[] | null
@@ -109,7 +119,6 @@ export type Database = {
           prazo_esclarecimento?: string | null
           requerente?: string
           requerido?: string
-          sentenca?: string | null
           status?: Database["public"]["Enums"]["pericia_status"] | null
           updated_at?: string | null
           user_id?: string | null
