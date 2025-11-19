@@ -43,7 +43,7 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
   };
 
   const NR15_ANEXOS = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  const NR16_ANEXOS = [1, 2, 3, 4, 5, 6, 7];
+  const NR16_ANEXOS = [1, 2, 3, 4, 5];
 
   return (
     <div className="space-y-4">
