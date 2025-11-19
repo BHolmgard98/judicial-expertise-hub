@@ -125,8 +125,54 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
                   Anexo {anexo}
                 </label>
               </div>
-            ))}
-          </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filtros de Ano e Mês */}
+      <div className="space-y-2">
+        <Label>Período de Nomeação</Label>
+        <div className="flex gap-2">
+          <Select 
+            value={filters.ano} 
+            onValueChange={(value) => setFilters({ ...filters, ano: value })}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Ano" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos os anos</SelectItem>
+              {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
+            value={filters.mes} 
+            onValueChange={(value) => setFilters({ ...filters, mes: value })}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos os meses</SelectItem>
+              <SelectItem value="1">Janeiro</SelectItem>
+              <SelectItem value="2">Fevereiro</SelectItem>
+              <SelectItem value="3">Março</SelectItem>
+              <SelectItem value="4">Abril</SelectItem>
+              <SelectItem value="5">Maio</SelectItem>
+              <SelectItem value="6">Junho</SelectItem>
+              <SelectItem value="7">Julho</SelectItem>
+              <SelectItem value="8">Agosto</SelectItem>
+              <SelectItem value="9">Setembro</SelectItem>
+              <SelectItem value="10">Outubro</SelectItem>
+              <SelectItem value="11">Novembro</SelectItem>
+              <SelectItem value="12">Dezembro</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

@@ -39,6 +39,26 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     if (filters.requerente) query = query.ilike("requerente", `%${filters.requerente}%`);
     if (filters.nr15.length > 0) query = query.overlaps("nr15", filters.nr15);
     if (filters.nr16.length > 0) query = query.overlaps("nr16", filters.nr16);
+    
+    // Filtro por mês/ano de nomeação
+    if (filters.ano && filters.mes) {
+      const year = parseInt(filters.ano);
+      const month = parseInt(filters.mes);
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      
+      query = query
+        .gte("data_nomeacao", startDate.toISOString().split('T')[0])
+        .lte("data_nomeacao", endDate.toISOString().split('T')[0]);
+    } else if (filters.ano) {
+      const year = parseInt(filters.ano);
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31);
+      
+      query = query
+        .gte("data_nomeacao", startDate.toISOString().split('T')[0])
+        .lte("data_nomeacao", endDate.toISOString().split('T')[0]);
+    }
 
     if (sortColumn) {
       query = query.order(sortColumn, { ascending: sortDirection === "asc" });
