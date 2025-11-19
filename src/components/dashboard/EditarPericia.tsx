@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { STATUS_OPTIONS } from "@/lib/statusColors";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface EditarPericiaProps {
   pericia: any;
@@ -23,6 +24,8 @@ interface EditarPericiaProps {
 const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showUpdateCalendarDialog, setShowUpdateCalendarDialog] = useState(false);
+  const [pendingUpdate, setPendingUpdate] = useState<any>(null);
   const [nr15Selected, setNr15Selected] = useState<number[]>(pericia.nr15 || []);
   const [nr16Selected, setNr16Selected] = useState<number[]>(pericia.nr16 || []);
   
@@ -68,6 +71,28 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Detecta se a perícia já tinha status "AGUARDANDO PERÍCIA" e continua com esse status
+    const isEditingAguardandoPericia = 
+      pericia.status === "AGUARDANDO PERÍCIA" && 
+      formData.status === "AGUARDANDO PERÍCIA";
+
+    // Se estiver editando uma perícia "AGUARDANDO PERÍCIA", pergunta se deseja atualizar no Google Agenda
+    if (isEditingAguardandoPericia) {
+      setPendingUpdate({
+        formData,
+        nr15Selected,
+        nr16Selected,
+      });
+      setShowUpdateCalendarDialog(true);
+      return;
+    }
+
+    // Caso contrário, processa normalmente
+    await processUpdate(false);
+  };
+
+  const processUpdate = async (shouldUpdateCalendar: boolean) => {
     setLoading(true);
 
     try {
@@ -117,8 +142,8 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
 
       if (error) throw error;
 
-      // Se deve sincronizar com Google Calendar
-      if (shouldSyncCalendar) {
+      // Se deve sincronizar com Google Calendar (mudança de status ou atualização confirmada)
+      if (shouldSyncCalendar || shouldUpdateCalendar) {
         try {
           const { error: calendarError } = await supabase.functions.invoke('google-calendar-sync', {
             body: {
@@ -185,7 +210,7 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
         }
       }
 
-      if (!shouldSyncCalendar) {
+      if (!shouldSyncCalendar && !shouldUpdateCalendar) {
         toast({
           title: "Perícia atualizada",
           description: "As alterações foram salvas com sucesso",
@@ -193,6 +218,8 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
       }
 
       onSuccess();
+      setShowUpdateCalendarDialog(false);
+      setPendingUpdate(null);
     } catch (error: any) {
       toast({
         title: "Erro ao atualizar",
@@ -610,6 +637,31 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
           {loading ? "Salvando..." : "Salvar Alterações"}
         </Button>
       </form>
+
+      {/* Dialog de confirmação para atualizar Google Agenda */}
+      <AlertDialog open={showUpdateCalendarDialog} onOpenChange={setShowUpdateCalendarDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Atualizar Google Agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta perícia já está agendada no Google Agenda. Deseja atualizar o evento com as novas informações?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={async () => {
+              setShowUpdateCalendarDialog(false);
+              await processUpdate(false);
+            }}>
+              Não, apenas salvar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={async () => {
+              await processUpdate(true);
+            }}>
+              Sim, atualizar agenda
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
