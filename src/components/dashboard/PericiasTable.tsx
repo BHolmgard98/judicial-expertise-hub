@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, MapPin } from "lucide-react";
+import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, MapPin, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
@@ -14,6 +14,7 @@ import VisualizarPericia from "./VisualizarPericia";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/statusColors";
 import { formatDateSafe } from "@/lib/utils";
+import { exportToExcel } from "@/lib/excelExport";
 
 interface PericiasTableProps {
   filters: FilterState;
@@ -165,6 +166,28 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      toast({
+        title: "Exportando...",
+        description: "Gerando arquivo Excel",
+      });
+
+      await exportToExcel(pericias, "pericias_filtradas");
+
+      toast({
+        title: "Exportação concluída",
+        description: `${pericias.length} perícia(s) exportada(s) com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao exportar",
+        description: "Não foi possível gerar o arquivo Excel",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Cálculos de paginação
   const totalPages = Math.ceil(pericias.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -177,8 +200,12 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Perícias Registradas ({pericias.length})</CardTitle>
           <div className="flex gap-2 items-center">
+            <Button onClick={handleExportToExcel} variant="outline" size="sm">
+              <FileDown className="w-4 h-4 mr-2" />
+              Exportar Excel
+            </Button>
             {selectedPericias.size > 1 && (
-              <Button onClick={handleCopyRoute} variant="outline">
+              <Button onClick={handleCopyRoute} variant="outline" size="sm">
                 <MapPin className="w-4 h-4 mr-2" />
                 Copiar Rota ({selectedPericias.size})
               </Button>
