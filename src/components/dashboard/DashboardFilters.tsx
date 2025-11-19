@@ -50,7 +50,17 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
           <Label>Status</Label>
-          <Select value={filters.status || "all"} onValueChange={(value) => setFilters({ ...filters, status: value === "all" ? "" : value })}>
+          <Select value={filters.status || "all"} onValueChange={(value) => setFilters({ 
+            ...filters, 
+            status: value === "all" ? "" : value,
+            // Limpar filtros dinâmicos ao mudar status
+            dataNomeacao: "",
+            dataAgendada: "",
+            horario: "",
+            dataEntrega: "",
+            prazoEsclarecimento: "",
+            vara: value === "all" || ["AGENDAR PERÍCIA", "AGUARDANDO PERÍCIA", "AGUARDANDO LAUDO", "AGUARDANDO ESCLARECIMENTOS"].includes(value) ? "" : filters.vara
+          })}>
             <SelectTrigger>
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
@@ -74,22 +84,75 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Vara</Label>
-          <Select value={filters.vara || "all"} onValueChange={(value) => setFilters({ ...filters, vara: value === "all" ? "" : value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Todas" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {varaOptions.map((vara) => (
-                <SelectItem key={vara} value={vara}>
-                  {vara}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Filtro dinâmico baseado no status */}
+        {filters.status === "AGENDAR PERÍCIA" ? (
+          <div className="space-y-2">
+            <Label>Data da Nomeação</Label>
+            <Input
+              type="date"
+              value={filters.dataNomeacao}
+              onChange={(e) => setFilters({ ...filters, dataNomeacao: e.target.value })}
+            />
+          </div>
+        ) : filters.status === "AGUARDANDO PERÍCIA" ? (
+          <>
+            <div className="space-y-2">
+              <Label>Data da Perícia Agendada</Label>
+              <Input
+                type="date"
+                value={filters.dataAgendada}
+                onChange={(e) => setFilters({ ...filters, dataAgendada: e.target.value })}
+              />
+            </div>
+          </>
+        ) : filters.status === "AGUARDANDO LAUDO" ? (
+          <div className="space-y-2">
+            <Label>Data de Entrega</Label>
+            <Input
+              type="date"
+              value={filters.dataEntrega}
+              onChange={(e) => setFilters({ ...filters, dataEntrega: e.target.value })}
+            />
+          </div>
+        ) : filters.status === "AGUARDANDO ESCLARECIMENTOS" ? (
+          <div className="space-y-2">
+            <Label>Prazo de Esclarecimento</Label>
+            <Input
+              type="date"
+              value={filters.prazoEsclarecimento}
+              onChange={(e) => setFilters({ ...filters, prazoEsclarecimento: e.target.value })}
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label>Vara</Label>
+            <Select value={filters.vara || "all"} onValueChange={(value) => setFilters({ ...filters, vara: value === "all" ? "" : value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {varaOptions.map((vara) => (
+                  <SelectItem key={vara} value={vara}>
+                    {vara}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Horário para status "Aguardando Perícia" */}
+        {filters.status === "AGUARDANDO PERÍCIA" && (
+          <div className="space-y-2">
+            <Label>Horário</Label>
+            <Input
+              type="time"
+              value={filters.horario}
+              onChange={(e) => setFilters({ ...filters, horario: e.target.value })}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

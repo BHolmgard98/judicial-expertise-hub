@@ -27,6 +27,11 @@ export interface FilterState {
   nr16: number[];
   ano: string;
   mes: string;
+  dataNomeacao: string;
+  dataAgendada: string;
+  horario: string;
+  dataEntrega: string;
+  prazoEsclarecimento: string;
 }
 
 const Dashboard = () => {
@@ -40,6 +45,11 @@ const Dashboard = () => {
     nr16: [],
     ano: "",
     mes: "",
+    dataNomeacao: "",
+    dataAgendada: "",
+    horario: "",
+    dataEntrega: "",
+    prazoEsclarecimento: "",
   });
   const [open, setOpen] = useState(false);
 

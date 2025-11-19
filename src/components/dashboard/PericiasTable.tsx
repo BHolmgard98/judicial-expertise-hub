@@ -25,10 +25,13 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [sortColumn, setSortColumn] = useState<"numero" | "vara" | "data_nomeacao" | "data_prazo" | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedPericias, setSelectedPericias] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchPericias();
+    setCurrentPage(1); // Reset para página 1 ao mudar filtros
   }, [filters, sortColumn, sortDirection]);
 
   const fetchPericias = async () => {
@@ -39,6 +42,13 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     if (filters.requerente) query = query.ilike("requerente", `%${filters.requerente}%`);
     if (filters.nr15.length > 0) query = query.overlaps("nr15", filters.nr15);
     if (filters.nr16.length > 0) query = query.overlaps("nr16", filters.nr16);
+    
+    // Filtros dinâmicos baseados no status
+    if (filters.dataNomeacao) query = query.eq("data_nomeacao", filters.dataNomeacao);
+    if (filters.dataAgendada) query = query.eq("data_pericia_agendada", filters.dataAgendada);
+    if (filters.horario) query = query.eq("horario", filters.horario);
+    if (filters.dataEntrega) query = query.eq("data_entrega", filters.dataEntrega);
+    if (filters.prazoEsclarecimento) query = query.eq("prazo_esclarecimento", filters.prazoEsclarecimento);
     
     // Filtro por mês/ano de nomeação
     if (filters.ano && filters.mes) {
@@ -154,17 +164,25 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     }
   };
 
+  // Cálculos de paginação
+  const totalPages = Math.ceil(pericias.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPericias = pericias.slice(startIndex, endIndex);
+
   return (
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Perícias Registradas</CardTitle>
-          {selectedPericias.size > 1 && (
-            <Button onClick={handleCopyRoute} variant="outline">
-              <MapPin className="w-4 h-4 mr-2" />
-              Copiar Rota ({selectedPericias.size})
-            </Button>
-          )}
+          <CardTitle>Perícias Registradas ({pericias.length})</CardTitle>
+          <div className="flex gap-2 items-center">
+            {selectedPericias.size > 1 && (
+              <Button onClick={handleCopyRoute} variant="outline">
+                <MapPin className="w-4 h-4 mr-2" />
+                Copiar Rota ({selectedPericias.size})
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -173,7 +191,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                 <TableRow>
                   <TableHead className="w-12">
                     <Checkbox
-                      checked={selectedPericias.size === pericias.length && pericias.length > 0}
+                      checked={selectedPericias.size === currentPericias.length && currentPericias.length > 0}
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
@@ -198,30 +216,65 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                   <TableHead>Reclamante</TableHead>
                   <TableHead>Processo</TableHead>
                   <TableHead>Reclamada</TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort("data_nomeacao")}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      Data de Nomeação
-                      {getSortIcon("data_nomeacao")}
-                    </button>
-                  </TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort("data_prazo")}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      Prazo de Entrega
-                      {getSortIcon("data_prazo")}
-                    </button>
-                  </TableHead>
+                  
+                  {/* Colunas dinâmicas baseadas no status filtrado */}
+                  {filters.status === "AGENDAR PERÍCIA" && (
+                    <TableHead>
+                      <button
+                        onClick={() => handleSort("data_nomeacao")}
+                        className="flex items-center hover:text-foreground transition-colors"
+                      >
+                        Data de Nomeação
+                        {getSortIcon("data_nomeacao")}
+                      </button>
+                    </TableHead>
+                  )}
+                  
+                  {filters.status === "AGUARDANDO PERÍCIA" && (
+                    <>
+                      <TableHead>Data Perícia Agendada</TableHead>
+                      <TableHead>Horário</TableHead>
+                    </>
+                  )}
+                  
+                  {filters.status === "AGUARDANDO LAUDO" && (
+                    <TableHead>Data de Entrega</TableHead>
+                  )}
+                  
+                  {filters.status === "AGUARDANDO ESCLARECIMENTOS" && (
+                    <TableHead>Prazo de Esclarecimento</TableHead>
+                  )}
+                  
+                  {/* Colunas padrão quando não há filtro específico ou para outros status */}
+                  {(!filters.status || !["AGENDAR PERÍCIA", "AGUARDANDO PERÍCIA", "AGUARDANDO LAUDO", "AGUARDANDO ESCLARECIMENTOS"].includes(filters.status)) && (
+                    <>
+                      <TableHead>
+                        <button
+                          onClick={() => handleSort("data_nomeacao")}
+                          className="flex items-center hover:text-foreground transition-colors"
+                        >
+                          Data de Nomeação
+                          {getSortIcon("data_nomeacao")}
+                        </button>
+                      </TableHead>
+                      <TableHead>
+                        <button
+                          onClick={() => handleSort("data_prazo")}
+                          className="flex items-center hover:text-foreground transition-colors"
+                        >
+                          Prazo de Entrega
+                          {getSortIcon("data_prazo")}
+                        </button>
+                      </TableHead>
+                    </>
+                  )}
+                  
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pericias.map((pericia) => (
+                {currentPericias.map((pericia) => (
                   <TableRow key={pericia.id}>
                     <TableCell>
                       <Checkbox
@@ -249,10 +302,43 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                       </div>
                     </TableCell>
                     <TableCell>{pericia.requerido}</TableCell>
-                    <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>
-                      {pericia.data_prazo ? format(new Date(pericia.data_prazo), "dd/MM/yyyy") : "-"}
-                    </TableCell>
+                    
+                    {/* Células dinâmicas baseadas no status filtrado */}
+                    {filters.status === "AGENDAR PERÍCIA" && (
+                      <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
+                    )}
+                    
+                    {filters.status === "AGUARDANDO PERÍCIA" && (
+                      <>
+                        <TableCell>
+                          {pericia.data_pericia_agendada ? format(new Date(pericia.data_pericia_agendada), "dd/MM/yyyy") : "-"}
+                        </TableCell>
+                        <TableCell>{pericia.horario || "-"}</TableCell>
+                      </>
+                    )}
+                    
+                    {filters.status === "AGUARDANDO LAUDO" && (
+                      <TableCell>
+                        {pericia.data_entrega ? format(new Date(pericia.data_entrega), "dd/MM/yyyy") : "-"}
+                      </TableCell>
+                    )}
+                    
+                    {filters.status === "AGUARDANDO ESCLARECIMENTOS" && (
+                      <TableCell>
+                        {pericia.prazo_esclarecimento ? format(new Date(pericia.prazo_esclarecimento), "dd/MM/yyyy") : "-"}
+                      </TableCell>
+                    )}
+                    
+                    {/* Células padrão quando não há filtro específico ou para outros status */}
+                    {(!filters.status || !["AGENDAR PERÍCIA", "AGUARDANDO PERÍCIA", "AGUARDANDO LAUDO", "AGUARDANDO ESCLARECIMENTOS"].includes(filters.status)) && (
+                      <>
+                        <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
+                        <TableCell>
+                          {pericia.data_prazo ? format(new Date(pericia.data_prazo), "dd/MM/yyyy") : "-"}
+                        </TableCell>
+                      </>
+                    )}
+                    
                     <TableCell>
                       <Badge className={getStatusColor(pericia.status)}>{pericia.status}</Badge>
                     </TableCell>
@@ -289,6 +375,77 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
               </TableBody>
             </Table>
           </div>
+          
+          {/* Paginação */}
+          {pericias.length > 0 && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Itens por página:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="border rounded px-2 py-1 text-sm bg-background"
+                >
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <span className="text-sm text-muted-foreground">
+                  {startIndex + 1}-{Math.min(endIndex, pericias.length)} de {pericias.length}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Anterior
+                </Button>
+                
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNumber}
+                        variant={currentPage === pageNumber ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className="w-8"
+                      >
+                        {pageNumber}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Próximo
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
