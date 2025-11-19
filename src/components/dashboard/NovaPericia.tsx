@@ -204,11 +204,11 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
             <Input
               id="email_reclamante"
               type="text"
-              placeholder="email1@exemplo.com, email2@exemplo.com"
+              placeholder="email1@exemplo.com; email2@exemplo.com"
               value={formData.email_reclamante}
               onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
             />
-            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por ponto e vírgula (;)</p>
             </div>
 
             <div className="space-y-2">
@@ -226,11 +226,11 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
             <Input
               id="email_reclamada"
               type="text"
-              placeholder="email1@exemplo.com, email2@exemplo.com"
+              placeholder="email1@exemplo.com; email2@exemplo.com"
               value={formData.email_reclamada}
               onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
             />
-            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por ponto e vírgula (;)</p>
             </div>
           </div>
         </div>
