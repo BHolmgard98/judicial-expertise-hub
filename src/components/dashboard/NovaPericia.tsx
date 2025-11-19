@@ -199,13 +199,15 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email_reclamante">Email Reclamante</Label>
-              <Input
-                id="email_reclamante"
-                type="email"
-                value={formData.email_reclamante}
-                onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
-              />
+            <Label htmlFor="email_reclamante">Email Reclamante</Label>
+            <Input
+              id="email_reclamante"
+              type="text"
+              placeholder="email1@exemplo.com, email2@exemplo.com"
+              value={formData.email_reclamante}
+              onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
             </div>
 
             <div className="space-y-2">
@@ -219,13 +221,15 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email_reclamada">Email Reclamada</Label>
-              <Input
-                id="email_reclamada"
-                type="email"
-                value={formData.email_reclamada}
-                onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
-              />
+            <Label htmlFor="email_reclamada">Email Reclamada</Label>
+            <Input
+              id="email_reclamada"
+              type="text"
+              placeholder="email1@exemplo.com, email2@exemplo.com"
+              value={formData.email_reclamada}
+              onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
             </div>
           </div>
         </div>

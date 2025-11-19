@@ -76,6 +76,11 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
         pericia.status === "AGENDAR PERÍCIA" && 
         formData.status === "AGUARDANDO PERÍCIA";
 
+      // Detecta se houve mudança nas datas de entrega ou esclarecimento
+      const shouldCreateDeadlineReminder = 
+        (formData.data_entrega && (!pericia.data_entrega || formData.data_entrega.toISOString() !== new Date(pericia.data_entrega).toISOString())) ||
+        (formData.data_esclarecimento && (!pericia.data_esclarecimento || formData.data_esclarecimento.toISOString() !== new Date(pericia.data_esclarecimento).toISOString()));
+
       const { error } = await supabase
         .from("pericias")
         .update({
@@ -117,6 +122,8 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
         try {
           const { error: calendarError } = await supabase.functions.invoke('google-calendar-sync', {
             body: {
+              tipo: 'pericia',
+              numero_processo: formData.numero_processo,
               requerente: formData.requerente,
               requerido: formData.requerido,
               data_pericia_agendada: formData.data_pericia_agendada?.toISOString().split('T')[0],
@@ -151,7 +158,34 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
             variant: "destructive",
           });
         }
-      } else {
+      }
+
+      // Cria lembretes para prazos de entrega/esclarecimento
+      if (shouldCreateDeadlineReminder) {
+        if (formData.data_entrega && (!pericia.data_entrega || formData.data_entrega.toISOString() !== new Date(pericia.data_entrega).toISOString())) {
+          await supabase.functions.invoke('google-calendar-sync', {
+            body: {
+              tipo: 'prazo_entrega',
+              numero_processo: formData.numero_processo,
+              requerente: formData.requerente,
+              data_prazo: formData.data_entrega.toISOString().split('T')[0],
+            },
+          });
+        }
+        
+        if (formData.data_esclarecimento && (!pericia.data_esclarecimento || formData.data_esclarecimento.toISOString() !== new Date(pericia.data_esclarecimento).toISOString())) {
+          await supabase.functions.invoke('google-calendar-sync', {
+            body: {
+              tipo: 'prazo_esclarecimento',
+              numero_processo: formData.numero_processo,
+              requerente: formData.requerente,
+              data_prazo: formData.data_esclarecimento.toISOString().split('T')[0],
+            },
+          });
+        }
+      }
+
+      if (!shouldSyncCalendar) {
         toast({
           title: "Perícia atualizada",
           description: "As alterações foram salvas com sucesso",
@@ -245,13 +279,15 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email_reclamante">Email Reclamante</Label>
-              <Input
-                id="email_reclamante"
-                type="email"
-                value={formData.email_reclamante}
-                onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
-              />
+            <Label htmlFor="email_reclamante">Email Reclamante</Label>
+            <Input
+              id="email_reclamante"
+              type="text"
+              placeholder="email1@exemplo.com, email2@exemplo.com"
+              value={formData.email_reclamante}
+              onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
             </div>
 
             <div className="space-y-2">
@@ -265,13 +301,15 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email_reclamada">Email Reclamada</Label>
-              <Input
-                id="email_reclamada"
-                type="email"
-                value={formData.email_reclamada}
-                onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
-              />
+            <Label htmlFor="email_reclamada">Email Reclamada</Label>
+            <Input
+              id="email_reclamada"
+              type="text"
+              placeholder="email1@exemplo.com, email2@exemplo.com"
+              value={formData.email_reclamada}
+              onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">Separe múltiplos emails por vírgula</p>
             </div>
           </div>
         </div>

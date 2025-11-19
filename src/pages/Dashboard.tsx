@@ -25,6 +25,8 @@ export interface FilterState {
   vara: string;
   nr15: number[];
   nr16: number[];
+  ano: string;
+  mes: string;
 }
 
 const Dashboard = () => {
@@ -36,6 +38,8 @@ const Dashboard = () => {
     vara: "",
     nr15: [],
     nr16: [],
+    ano: "",
+    mes: "",
   });
   const [open, setOpen] = useState(false);
 
