@@ -15,6 +15,7 @@ import { STATUS_OPTIONS } from "@/lib/statusColors";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NR15_KEYS, NR16_KEYS, getNR15Label, getNR16Label } from "@/lib/nrAnexos";
+import { formatCurrencyInput, parseCurrencyBR } from "@/lib/utils";
 
 interface NovaPericiaProps {
   onSuccess: (nr15: number[], nr16: number[]) => void;
@@ -50,7 +51,10 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     data_recebimento: undefined as Date | undefined,
     valor_recebimento: "",
     honorarios: "",
-    sentenca: "",
+    deslocamento: "",
+    estacao: "",
+    linha_numero: "",
+    linha_cor: "",
     observacoes: "",
   });
 
@@ -83,7 +87,7 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
         requerente: formData.requerente,
         funcao: formData.funcao || null,
         requerido: formData.requerido,
-        valor_causa: formData.valor_causa ? parseFloat(formData.valor_causa) : null,
+        valor_causa: formData.valor_causa ? parseCurrencyBR(formData.valor_causa) : null,
         nr15: nr15Selected.length > 0 ? nr15Selected : null,
         nr16: nr16Selected.length > 0 ? nr16Selected : null,
         perito: formData.perito,
@@ -99,9 +103,12 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
         prazo_esclarecimento: formData.prazo_esclarecimento?.toISOString().split('T')[0] || null,
         data_esclarecimento: formData.data_esclarecimento?.toISOString().split('T')[0] || null,
         data_recebimento: formData.data_recebimento?.toISOString().split('T')[0] || null,
-        valor_recebimento: formData.valor_recebimento ? parseFloat(formData.valor_recebimento) : null,
-        honorarios: formData.honorarios ? parseFloat(formData.honorarios) : null,
-        sentenca: formData.sentenca || null,
+        valor_recebimento: formData.valor_recebimento ? parseCurrencyBR(formData.valor_recebimento) : null,
+        honorarios: formData.honorarios ? parseCurrencyBR(formData.honorarios) : null,
+        deslocamento: formData.deslocamento || null,
+        estacao: formData.estacao || null,
+        linha_numero: formData.linha_numero || null,
+        linha_cor: formData.linha_cor || null,
         observacoes: formData.observacoes || null,
         user_id: user.id,
       } as any);
@@ -242,10 +249,10 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
               <Label htmlFor="valor_causa">Valor da Causa (R$)</Label>
               <Input
                 id="valor_causa"
-                type="number"
-                step="0.01"
+                type="text"
+                placeholder="1.234,56"
                 value={formData.valor_causa}
-                onChange={(e) => setFormData({ ...formData, valor_causa: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, valor_causa: formatCurrencyInput(e.target.value) })}
               />
             </div>
 
@@ -253,10 +260,10 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
               <Label htmlFor="honorarios">Honorários (R$)</Label>
               <Input
                 id="honorarios"
-                type="number"
-                step="0.01"
+                type="text"
+                placeholder="1.234,56"
                 value={formData.honorarios}
-                onChange={(e) => setFormData({ ...formData, honorarios: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, honorarios: formatCurrencyInput(e.target.value) })}
               />
             </div>
 
@@ -264,10 +271,10 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
               <Label htmlFor="valor_recebimento">Valor do Recebimento (R$)</Label>
               <Input
                 id="valor_recebimento"
-                type="number"
-                step="0.01"
+                type="text"
+                placeholder="1.234,56"
                 value={formData.valor_recebimento}
-                onChange={(e) => setFormData({ ...formData, valor_recebimento: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, valor_recebimento: formatCurrencyInput(e.target.value) })}
               />
             </div>
           </div>
@@ -509,15 +516,55 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="sentenca">Sentença</Label>
-              <Textarea
-                id="sentenca"
-                value={formData.sentenca}
-                onChange={(e) => setFormData({ ...formData, sentenca: e.target.value })}
-                rows={3}
-              />
+            <div className="space-y-2">
+              <Label htmlFor="deslocamento">Deslocamento</Label>
+              <Select
+                value={formData.deslocamento}
+                onValueChange={(value) => setFormData({ ...formData, deslocamento: value })}
+              >
+                <SelectTrigger id="deslocamento">
+                  <SelectValue placeholder="Selecione o tipo de deslocamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Carro">Carro</SelectItem>
+                  <SelectItem value="Transporte Público">Transporte Público</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {formData.deslocamento === "Transporte Público" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="estacao">Estação</Label>
+                  <Input
+                    id="estacao"
+                    placeholder="Ex: Guaianases"
+                    value={formData.estacao}
+                    onChange={(e) => setFormData({ ...formData, estacao: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="linha_numero">Nº Linha</Label>
+                  <Input
+                    id="linha_numero"
+                    placeholder="Ex: Linha 11"
+                    value={formData.linha_numero}
+                    onChange={(e) => setFormData({ ...formData, linha_numero: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="linha_cor">Cor</Label>
+                  <Input
+                    id="linha_cor"
+                    placeholder="Ex: Coral"
+                    value={formData.linha_cor}
+                    onChange={(e) => setFormData({ ...formData, linha_cor: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="observacoes">Observações</Label>

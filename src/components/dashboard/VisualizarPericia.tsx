@@ -186,9 +186,25 @@ const VisualizarPericia = ({ pericia }: VisualizarPericiaProps) => {
               <p className="text-base">{pericia.endereco || "-"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Sentença</label>
-              <p className="text-base">{pericia.sentenca || "-"}</p>
+              <label className="text-sm font-medium text-muted-foreground">Deslocamento</label>
+              <p className="text-base">{pericia.deslocamento || "-"}</p>
             </div>
+            {pericia.deslocamento === "Transporte Público" && (
+              <>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Estação</label>
+                  <p className="text-base">{pericia.estacao || "-"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Nº Linha</label>
+                  <p className="text-base">{pericia.linha_numero || "-"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Cor</label>
+                  <p className="text-base">{pericia.linha_cor || "-"}</p>
+                </div>
+              </>
+            )}
             {pericia.observacoes && (
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Observações</label>

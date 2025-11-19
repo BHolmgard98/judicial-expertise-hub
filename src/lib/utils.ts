@@ -27,3 +27,56 @@ export function formatDateSafe(dateString: string | null | undefined, formatStr:
   
   return format(date, formatStr);
 }
+
+/**
+ * Formata um valor numérico para o padrão brasileiro de moeda (R$ 1.234,56)
+ */
+export function formatCurrency(value: number | string | null | undefined): string {
+  if (!value && value !== 0) return "";
+  
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(numValue)) return "";
+  
+  return numValue.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Remove formatação brasileira e converte para número
+ * Aceita: "1.234,56" ou "1234,56" e retorna 1234.56
+ */
+export function parseCurrencyBR(value: string): number {
+  if (!value) return 0;
+  
+  // Remove pontos (separador de milhares) e substitui vírgula por ponto
+  const cleaned = value.replace(/\./g, "").replace(",", ".");
+  return parseFloat(cleaned) || 0;
+}
+
+/**
+ * Formata valor enquanto o usuário digita (padrão brasileiro)
+ * Aplica formatação automaticamente: "1234.56" vira "1.234,56"
+ */
+export function formatCurrencyInput(value: string): string {
+  // Remove tudo que não é número ou vírgula
+  let cleaned = value.replace(/[^\d,]/g, "");
+  
+  // Garante apenas uma vírgula
+  const parts = cleaned.split(",");
+  if (parts.length > 2) {
+    cleaned = parts[0] + "," + parts.slice(1).join("");
+  }
+  
+  // Separa parte inteira e decimal
+  const [integerPart, decimalPart] = cleaned.split(",");
+  
+  // Adiciona pontos como separador de milhares
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  
+  // Retorna com decimal se existir
+  return decimalPart !== undefined 
+    ? `${formattedInteger},${decimalPart.slice(0, 2)}`
+    : formattedInteger;
+}
