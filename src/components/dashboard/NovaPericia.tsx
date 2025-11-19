@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { STATUS_OPTIONS } from "@/lib/statusColors";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { NR15_KEYS, NR16_KEYS, getNR15Label, getNR16Label } from "@/lib/nrAnexos";
 
 interface NovaPericiaProps {
   onSuccess: (nr15: number[], nr16: number[]) => void;
@@ -277,15 +278,17 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>NR15</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {[...Array(14)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-2">
+              <div className="grid grid-cols-2 gap-2">
+                {NR15_KEYS.map((anexo) => (
+                  <div key={anexo} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`nr15-${i + 1}`}
-                      checked={nr15Selected.includes(i + 1)}
-                      onCheckedChange={() => handleNr15Change(i + 1)}
+                      id={`nr15-${anexo}`}
+                      checked={nr15Selected.includes(anexo)}
+                      onCheckedChange={() => handleNr15Change(anexo)}
                     />
-                    <label htmlFor={`nr15-${i + 1}`} className="text-sm">{i + 1}</label>
+                    <label htmlFor={`nr15-${anexo}`} className="text-sm">
+                      {anexo} - {getNR15Label(anexo)}
+                    </label>
                   </div>
                 ))}
               </div>
@@ -293,15 +296,17 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
 
             <div className="space-y-2">
               <Label>NR16</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-2">
+              <div className="grid grid-cols-2 gap-2">
+                {NR16_KEYS.map((anexo) => (
+                  <div key={anexo} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`nr16-${i + 1}`}
-                      checked={nr16Selected.includes(i + 1)}
-                      onCheckedChange={() => handleNr16Change(i + 1)}
+                      id={`nr16-${anexo}`}
+                      checked={nr16Selected.includes(anexo)}
+                      onCheckedChange={() => handleNr16Change(anexo)}
                     />
-                    <label htmlFor={`nr16-${i + 1}`} className="text-sm">{i + 1}</label>
+                    <label htmlFor={`nr16-${anexo}`} className="text-sm">
+                      {anexo} - {getNR16Label(anexo)}
+                    </label>
                   </div>
                 ))}
               </div>
