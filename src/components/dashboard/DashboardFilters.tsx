@@ -125,7 +125,8 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
                   Anexo {anexo}
                 </label>
               </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
