@@ -135,14 +135,14 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
         <Label>Período de Nomeação</Label>
         <div className="flex gap-2">
           <Select 
-            value={filters.ano} 
-            onValueChange={(value) => setFilters({ ...filters, ano: value })}
+            value={filters.ano || "all"} 
+            onValueChange={(value) => setFilters({ ...filters, ano: value === "all" ? "" : value })}
           >
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Ano" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os anos</SelectItem>
+              <SelectItem value="all">Todos os anos</SelectItem>
               {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
                 <SelectItem key={year} value={year.toString()}>
                   {year}
@@ -152,14 +152,14 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
           </Select>
 
           <Select 
-            value={filters.mes} 
-            onValueChange={(value) => setFilters({ ...filters, mes: value })}
+            value={filters.mes || "all"} 
+            onValueChange={(value) => setFilters({ ...filters, mes: value === "all" ? "" : value })}
           >
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Mês" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os meses</SelectItem>
+              <SelectItem value="all">Todos os meses</SelectItem>
               <SelectItem value="1">Janeiro</SelectItem>
               <SelectItem value="2">Fevereiro</SelectItem>
               <SelectItem value="3">Março</SelectItem>
