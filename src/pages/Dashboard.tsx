@@ -111,7 +111,11 @@ const Dashboard = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <NovaPericia onSuccess={() => setOpen(false)} />
+                  <NovaPericia onSuccess={(nr15, nr16) => {
+                    setOpen(false);
+                    // Aplicar filtros dos anexos da nova perícia
+                    setFilters({ ...filters, nr15, nr16 });
+                  }} />
                 </DialogContent>
               </Dialog>
             </CardHeader>
