@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface NovaPericiaProps {
-  onSuccess: () => void;
+  onSuccess: (nr15: number[], nr16: number[]) => void;
 }
 
 const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
@@ -112,7 +112,7 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
         description: "A perícia foi adicionada com sucesso",
       });
 
-      onSuccess();
+      onSuccess(nr15Selected, nr16Selected);
     } catch (error: any) {
       toast({
         title: "Erro ao cadastrar",
