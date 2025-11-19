@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { FilterState } from "@/pages/Dashboard";
 import { STATUS_OPTIONS } from "@/lib/statusColors";
 import { Checkbox } from "@/components/ui/checkbox";
+import { NR15_KEYS, NR16_KEYS, getNR15Label, getNR16Label } from "@/lib/nrAnexos";
 
 interface DashboardFiltersProps {
   filters: FilterState;
@@ -41,9 +42,6 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
       : [...filters.nr16, value];
     setFilters({ ...filters, nr16: newNr16 });
   };
-
-  const NR15_ANEXOS = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  const NR16_ANEXOS = [1, 2, 3, 4, 5];
 
   return (
     <div className="space-y-4">
@@ -159,7 +157,7 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
         <div className="space-y-2">
           <Label>Anexos NR15</Label>
           <div className="flex flex-wrap gap-3 p-3 border rounded-md bg-background">
-            {NR15_ANEXOS.map((anexo) => (
+            {NR15_KEYS.map((anexo) => (
               <div key={anexo} className="flex items-center space-x-2">
                 <Checkbox
                   id={`nr15-${anexo}`}
@@ -167,7 +165,7 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
                   onCheckedChange={() => handleNr15Change(anexo)}
                 />
                 <label htmlFor={`nr15-${anexo}`} className="text-sm cursor-pointer">
-                  Anexo {anexo}
+                  {anexo} - {getNR15Label(anexo)}
                 </label>
               </div>
             ))}
@@ -177,7 +175,7 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
         <div className="space-y-2">
           <Label>Anexos NR16</Label>
           <div className="flex flex-wrap gap-3 p-3 border rounded-md bg-background">
-            {NR16_ANEXOS.map((anexo) => (
+            {NR16_KEYS.map((anexo) => (
               <div key={anexo} className="flex items-center space-x-2">
                 <Checkbox
                   id={`nr16-${anexo}`}
@@ -185,7 +183,7 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
                   onCheckedChange={() => handleNr16Change(anexo)}
                 />
                 <label htmlFor={`nr16-${anexo}`} className="text-sm cursor-pointer">
-                  Anexo {anexo}
+                  {anexo} - {getNR16Label(anexo)}
                 </label>
               </div>
             ))}

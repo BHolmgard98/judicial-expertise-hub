@@ -13,6 +13,7 @@ import EditarPericia from "./EditarPericia";
 import VisualizarPericia from "./VisualizarPericia";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/statusColors";
+import { formatDateSafe } from "@/lib/utils";
 
 interface PericiasTableProps {
   filters: FilterState;
@@ -305,13 +306,13 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                     
                     {/* Células dinâmicas baseadas no status filtrado */}
                     {filters.status === "AGENDAR PERÍCIA" && (
-                      <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{formatDateSafe(pericia.data_nomeacao)}</TableCell>
                     )}
                     
                     {filters.status === "AGUARDANDO PERÍCIA" && (
                       <>
                         <TableCell>
-                          {pericia.data_pericia_agendada ? format(new Date(pericia.data_pericia_agendada), "dd/MM/yyyy") : "-"}
+                          {formatDateSafe(pericia.data_pericia_agendada)}
                         </TableCell>
                         <TableCell>{pericia.horario || "-"}</TableCell>
                       </>
@@ -319,22 +320,22 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                     
                     {filters.status === "AGUARDANDO LAUDO" && (
                       <TableCell>
-                        {pericia.data_entrega ? format(new Date(pericia.data_entrega), "dd/MM/yyyy") : "-"}
+                        {formatDateSafe(pericia.data_entrega)}
                       </TableCell>
                     )}
                     
                     {filters.status === "AGUARDANDO ESCLARECIMENTOS" && (
                       <TableCell>
-                        {pericia.prazo_esclarecimento ? format(new Date(pericia.prazo_esclarecimento), "dd/MM/yyyy") : "-"}
+                        {formatDateSafe(pericia.prazo_esclarecimento)}
                       </TableCell>
                     )}
                     
                     {/* Células padrão quando não há filtro específico ou para outros status */}
                     {(!filters.status || !["AGENDAR PERÍCIA", "AGUARDANDO PERÍCIA", "AGUARDANDO LAUDO", "AGUARDANDO ESCLARECIMENTOS"].includes(filters.status)) && (
                       <>
-                        <TableCell>{format(new Date(pericia.data_nomeacao), "dd/MM/yyyy")}</TableCell>
+                        <TableCell>{formatDateSafe(pericia.data_nomeacao)}</TableCell>
                         <TableCell>
-                          {pericia.data_prazo ? format(new Date(pericia.data_prazo), "dd/MM/yyyy") : "-"}
+                          {formatDateSafe(pericia.data_prazo)}
                         </TableCell>
                       </>
                     )}
