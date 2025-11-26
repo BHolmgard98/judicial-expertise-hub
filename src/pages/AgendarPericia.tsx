@@ -16,11 +16,13 @@ const AgendarPericia = () => {
   const [pericias, setPericias] = useState<any[]>([]);
   const [editingPericia, setEditingPericia] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<string>("data_nomeacao");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     checkAuth();
     fetchPericias();
-  }, []);
+  }, [sortField, sortDirection]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -34,7 +36,7 @@ const AgendarPericia = () => {
       .from("pericias")
       .select("*")
       .eq("status", "AGENDAR PERÍCIA")
-      .order("data_nomeacao", { ascending: false });
+      .order(sortField, { ascending: sortDirection === "asc" });
 
     if (error) {
       toast({
@@ -114,6 +116,20 @@ const AgendarPericia = () => {
     fetchPericias();
   };
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return null;
+    return sortDirection === "asc" ? "↑" : "↓";
+  };
+
   const formatNRs = (nr15: number[] | null, nr16: number[] | null) => {
     const nrs = [];
     if (nr15 && nr15.length > 0) {
@@ -136,13 +152,21 @@ const AgendarPericia = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nº</TableHead>
-                  <TableHead>Vara</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("numero")}>
+                    Nº {getSortIcon("numero")}
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("vara")}>
+                    Vara {getSortIcon("vara")}
+                  </TableHead>
                   <TableHead>Reclamante</TableHead>
                   <TableHead>Processo</TableHead>
                   <TableHead>Reclamada</TableHead>
-                  <TableHead>Data Nomeação</TableHead>
-                  <TableHead>Data Perícia</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("data_nomeacao")}>
+                    Data Nomeação {getSortIcon("data_nomeacao")}
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("data_pericia_agendada")}>
+                    Data Perícia {getSortIcon("data_pericia_agendada")}
+                  </TableHead>
                   <TableHead>Horário</TableHead>
                   <TableHead>Endereço</TableHead>
                   <TableHead>NRs</TableHead>
@@ -152,12 +176,12 @@ const AgendarPericia = () => {
               <TableBody>
                 {pericias.map((pericia) => (
                   <TableRow key={pericia.id}>
-                    <TableCell>{pericia.numero || "-"}</TableCell>
-                    <TableCell>{pericia.vara}</TableCell>
-                    <TableCell>{pericia.requerente}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{pericia.numero || "-"}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{pericia.vara}</TableCell>
+                    <TableCell className="text-xs sm:text-sm lowercase max-w-[120px] truncate">{pericia.requerente}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{pericia.numero_processo}</span>
+                        <span className="text-xs sm:text-sm">{pericia.numero_processo}</span>
                         {pericia.link_processo && (
                           <a 
                             href={pericia.link_processo} 
@@ -165,52 +189,56 @@ const AgendarPericia = () => {
                             rel="noopener noreferrer"
                             className="text-primary hover:text-primary/80"
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                           </a>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{pericia.requerido}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs sm:text-sm lowercase max-w-[120px] truncate">{pericia.requerido}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">
                       {pericia.data_nomeacao ? new Date(pericia.data_nomeacao).toLocaleDateString("pt-BR") : "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs sm:text-sm">
                       {pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada).toLocaleDateString("pt-BR") : "-"}
                     </TableCell>
-                    <TableCell>{pericia.horario || "-"}</TableCell>
-                    <TableCell className="max-w-xs truncate">{pericia.endereco || "-"}</TableCell>
-                    <TableCell className="text-sm">{formatNRs(pericia.nr15, pericia.nr16)}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{pericia.horario || "-"}</TableCell>
+                    <TableCell className="text-xs sm:text-sm lowercase max-w-[150px] truncate">{pericia.endereco || "-"}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{formatNRs(pericia.nr15, pericia.nr16)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleUpdateAgenda(pericia)}
                           title="Atualizar na Agenda"
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         >
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleCopyEmails(pericia)}
                           title="Copiar Emails"
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         >
-                          <Mail className="w-4 h-4" />
+                          <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => setEditingPericia(pericia)}
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         >
-                          <Pencil className="w-4 h-4" />
+                          <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => setDeletingId(pericia.id)}
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                       </div>
                     </TableCell>
