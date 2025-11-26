@@ -28,8 +28,12 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
   const [loading, setLoading] = useState(false);
   const [showUpdateCalendarDialog, setShowUpdateCalendarDialog] = useState(false);
   const [pendingUpdate, setPendingUpdate] = useState<any>(null);
-  const [nr15Selected, setNr15Selected] = useState<number[]>(pericia.nr15 || []);
-  const [nr16Selected, setNr16Selected] = useState<number[]>(pericia.nr16 || []);
+  const [nr15Selected, setNr15Selected] = useState<number[]>(pericia?.nr15 || []);
+  const [nr16Selected, setNr16Selected] = useState<number[]>(pericia?.nr16 || []);
+  
+  if (!pericia) {
+    return null;
+  }
   
   const [formData, setFormData] = useState({
     numero_processo: pericia.numero_processo,

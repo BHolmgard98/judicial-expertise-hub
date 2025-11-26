@@ -269,13 +269,15 @@ const AgendarPericia = () => {
       {/* Dialog para editar */}
       <Dialog open={!!editingPericia} onOpenChange={(open) => !open && setEditingPericia(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <EditarPericia 
-            pericia={editingPericia} 
-            onSuccess={() => {
-              setEditingPericia(null);
-              fetchPericias();
-            }} 
-          />
+          {editingPericia && (
+            <EditarPericia 
+              pericia={editingPericia} 
+              onSuccess={() => {
+                setEditingPericia(null);
+                fetchPericias();
+              }} 
+            />
+          )}
         </DialogContent>
       </Dialog>
 
