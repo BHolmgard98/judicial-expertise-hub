@@ -6,7 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Calendar, Mail, Pencil, Trash2 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -18,6 +25,9 @@ const AgendarPericia = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string>("data_nomeacao");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [schedulingPericia, setSchedulingPericia] = useState<any>(null);
+  const [scheduleData, setScheduleData] = useState({ data: undefined as Date | undefined, horario: "" });
 
   useEffect(() => {
     checkAuth();
@@ -51,6 +61,17 @@ const AgendarPericia = () => {
   };
 
   const handleUpdateAgenda = async (pericia: any) => {
+    // Verifica se tem data e horário
+    if (!pericia.data_pericia_agendada || !pericia.horario) {
+      setSchedulingPericia(pericia);
+      setScheduleData({
+        data: pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada) : undefined,
+        horario: pericia.horario || ""
+      });
+      setScheduleDialogOpen(true);
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
         body: { pericia },
@@ -67,6 +88,60 @@ const AgendarPericia = () => {
       toast({
         title: "Erro",
         description: "Não foi possível atualizar no Google Agenda",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleConfirmSchedule = async () => {
+    if (!scheduleData.data || !scheduleData.horario) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha data e horário para agendar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Atualiza a perícia no banco primeiro
+      const { error: updateError } = await supabase
+        .from("pericias")
+        .update({
+          data_pericia_agendada: format(scheduleData.data, "yyyy-MM-dd"),
+          horario: scheduleData.horario,
+        })
+        .eq("id", schedulingPericia.id);
+
+      if (updateError) throw updateError;
+
+      // Prepara os dados para enviar ao Google Agenda
+      const periciaAtualizada = {
+        ...schedulingPericia,
+        data_pericia_agendada: format(scheduleData.data, "yyyy-MM-dd"),
+        horario: scheduleData.horario,
+      };
+
+      const { error } = await supabase.functions.invoke("google-calendar-sync", {
+        body: { pericia: periciaAtualizada },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Perícia agendada e adicionada ao Google Agenda",
+      });
+
+      setScheduleDialogOpen(false);
+      setSchedulingPericia(null);
+      setScheduleData({ data: undefined, horario: "" });
+      fetchPericias();
+    } catch (error) {
+      console.error("Erro ao agendar:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível agendar a perícia",
         variant: "destructive",
       });
     }
@@ -265,6 +340,52 @@ const AgendarPericia = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog para agendar data e horário */}
+      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agendar Perícia</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Data da Perícia *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {scheduleData.data ? format(scheduleData.data, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={scheduleData.data}
+                    onSelect={(date) => setScheduleData({ ...scheduleData, data: date })}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label>Horário *</Label>
+              <Input
+                type="time"
+                value={scheduleData.horario}
+                onChange={(e) => setScheduleData({ ...scheduleData, horario: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setScheduleDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmSchedule}>
+              Agendar e Adicionar ao Google Agenda
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog para editar */}
       <Dialog open={!!editingPericia} onOpenChange={(open) => !open && setEditingPericia(null)}>
