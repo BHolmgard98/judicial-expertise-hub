@@ -130,6 +130,15 @@ const AgendarPericia = () => {
     return sortDirection === "asc" ? "↑" : "↓";
   };
 
+  const capitalizeWords = (text: string) => {
+    if (!text) return text;
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   const formatNRs = (nr15: number[] | null, nr16: number[] | null) => {
     const nrs = [];
     if (nr15 && nr15.length > 0) {
@@ -178,7 +187,7 @@ const AgendarPericia = () => {
                   <TableRow key={pericia.id}>
                     <TableCell className="text-xs sm:text-sm">{pericia.numero || "-"}</TableCell>
                     <TableCell className="text-xs sm:text-sm">{pericia.vara}</TableCell>
-                    <TableCell className="text-xs sm:text-sm lowercase max-w-[120px] truncate">{pericia.requerente}</TableCell>
+                    <TableCell className="text-xs sm:text-sm max-w-[120px] truncate">{capitalizeWords(pericia.requerente)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="text-xs sm:text-sm">{pericia.numero_processo}</span>
@@ -194,7 +203,7 @@ const AgendarPericia = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs sm:text-sm lowercase max-w-[120px] truncate">{pericia.requerido}</TableCell>
+                    <TableCell className="text-xs sm:text-sm max-w-[120px] truncate">{capitalizeWords(pericia.requerido)}</TableCell>
                     <TableCell className="text-xs sm:text-sm">
                       {pericia.data_nomeacao ? new Date(pericia.data_nomeacao).toLocaleDateString("pt-BR") : "-"}
                     </TableCell>
@@ -202,7 +211,7 @@ const AgendarPericia = () => {
                       {pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada).toLocaleDateString("pt-BR") : "-"}
                     </TableCell>
                     <TableCell className="text-xs sm:text-sm">{pericia.horario || "-"}</TableCell>
-                    <TableCell className="text-xs sm:text-sm lowercase max-w-[150px] truncate">{pericia.endereco || "-"}</TableCell>
+                    <TableCell className="text-xs sm:text-sm max-w-[150px] truncate">{capitalizeWords(pericia.endereco || "-")}</TableCell>
                     <TableCell className="text-xs sm:text-sm">{formatNRs(pericia.nr15, pericia.nr16)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1 sm:gap-2">
