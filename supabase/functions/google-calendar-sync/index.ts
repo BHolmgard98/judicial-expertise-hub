@@ -156,9 +156,10 @@ serve(async (req) => {
   }
 
   try {
-    const pericia: PericiaData = await req.json();
+    const body = await req.json();
+    const pericia: PericiaData = body.pericia || body;
 
-    console.log('Received perícia data:', JSON.stringify(pericia, null, 2));
+    console.log('Received perícia data:', JSON.stringify({ pericia }, null, 2));
 
     // Validações
     if (!pericia.requerente || !pericia.data_pericia_agendada) {
