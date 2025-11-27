@@ -6,16 +6,19 @@ const corsHeaders = {
 };
 
 interface PericiaData {
+  tipo?: string; // "prazo_esclarecimento" ou undefined para perícia
   requerente: string;
-  requerido: string;
-  data_pericia_agendada: string;
-  horario: string;
-  endereco: string;
-  observacoes: string;
-  link_processo: string;
-  funcao: string;
-  nr15: number[];
-  nr16: number[];
+  requerido?: string;
+  numero_processo?: string;
+  data_pericia_agendada?: string;
+  data_prazo?: string;
+  horario?: string;
+  endereco?: string;
+  observacoes?: string;
+  link_processo?: string;
+  funcao?: string;
+  nr15?: number[];
+  nr16?: number[];
 }
 
 async function getAccessToken() {
@@ -77,6 +80,13 @@ function buildEquipmentList(nr15: number[]): string {
 }
 
 function buildEventDescription(pericia: PericiaData): string {
+  // Se for prazo de esclarecimento, descrição simplificada
+  if (pericia.tipo === 'prazo_esclarecimento') {
+    return `Processo: ${pericia.numero_processo || 'Não informado'}
+Reclamante: ${pericia.requerente}
+Prazo para entrega de esclarecimentos.`.trim();
+  }
+
   const nr15Text = pericia.nr15 && pericia.nr15.length > 0
     ? `Anexo da NR-15 a ser avaliado: ${pericia.nr15.join(', ')}`
     : '';
@@ -85,9 +95,9 @@ function buildEventDescription(pericia: PericiaData): string {
     ? `Anexo da NR-16 a ser avaliado: ${pericia.nr16.join(', ')}`
     : '';
 
-  const equipment = buildEquipmentList(pericia.nr15);
+  const equipment = buildEquipmentList(pericia.nr15 || []);
 
-  return `${pericia.observacoes ? pericia.observacoes + '\n\n' : ''}Reclamada: ${pericia.requerido}
+  return `${pericia.observacoes ? pericia.observacoes + '\n\n' : ''}Reclamada: ${pericia.requerido || 'Não informada'}
 Link do Processo: ${pericia.link_processo || 'Não informado'}
 Função: ${pericia.funcao || 'Não informada'}
 
@@ -100,31 +110,44 @@ ${equipment}`.trim();
 async function createCalendarEvent(pericia: PericiaData) {
   const accessToken = await getAccessToken();
 
-  // Garante que a data está no formato correto YYYY-MM-DD
-  // Remove qualquer parte de timezone que possa estar na string
-  const dateOnly = pericia.data_pericia_agendada.split('T')[0];
+  // Determina qual data usar baseado no tipo
+  const isPrazoEsclarecimento = pericia.tipo === 'prazo_esclarecimento';
+  const dateSource = isPrazoEsclarecimento ? pericia.data_prazo : pericia.data_pericia_agendada;
   
-  // Formata data e horário no formato correto para o Google Calendar
-  // Formato: YYYY-MM-DDTHH:MM:SS (sem Z, para respeitar o timezone de São Paulo)
-  const timeString = (pericia.horario || '09:00').substring(0, 5); // Pega apenas HH:MM
+  if (!dateSource) {
+    throw new Error('Data não informada');
+  }
+
+  // Garante que a data está no formato correto YYYY-MM-DD
+  const dateOnly = dateSource.split('T')[0];
+  
+  // Para prazo de esclarecimento, evento de dia inteiro ou horário padrão
+  // Para perícia, usa o horário informado
+  const timeString = isPrazoEsclarecimento ? '09:00' : (pericia.horario || '09:00').substring(0, 5);
   const startDateTime = `${dateOnly}T${timeString}:00`;
   
-  // Calcula horário de término (2 horas depois)
+  // Calcula horário de término
   const [hours, minutes] = timeString.split(':');
-  let endHour = parseInt(hours) + 2;
-  if (endHour >= 24) endHour = 23; // Evita horário inválido
+  let endHour = parseInt(hours) + (isPrazoEsclarecimento ? 1 : 2);
+  if (endHour >= 24) endHour = 23;
   const endDateTime = `${dateOnly}T${endHour.toString().padStart(2, '0')}:${minutes}:00`;
 
   console.log('Date processing:', { 
-    original: pericia.data_pericia_agendada, 
+    tipo: pericia.tipo,
+    original: dateSource, 
     dateOnly, 
     timeString, 
     startDateTime, 
     endDateTime 
   });
 
+  // Define o título do evento baseado no tipo
+  const summary = isPrazoEsclarecimento 
+    ? `PRAZO ESCLARECIMENTO - ${pericia.requerente}`
+    : `PERÍCIA - ${pericia.requerente}`;
+
   const event = {
-    summary: `PERÍCIA - ${pericia.requerente}`,
+    summary,
     location: pericia.endereco || '',
     description: buildEventDescription(pericia),
     start: {
@@ -174,9 +197,10 @@ serve(async (req) => {
 
     console.log('Received perícia data:', JSON.stringify({ pericia }, null, 2));
 
-    // Validações
-    if (!pericia.requerente || !pericia.data_pericia_agendada) {
-      throw new Error('Missing required fields: requerente or data_pericia_agendada');
+    // Validações - aceita tanto data_pericia_agendada quanto data_prazo
+    const hasRequiredDate = pericia.data_pericia_agendada || pericia.data_prazo;
+    if (!pericia.requerente || !hasRequiredDate) {
+      throw new Error('Missing required fields: requerente or data (data_pericia_agendada ou data_prazo)');
     }
 
     const result = await createCalendarEvent(pericia);
