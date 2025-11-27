@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { NR15_KEYS, NR16_KEYS, getNR15Label, getNR16Label } from "@/lib/nrAnexos";
-import { formatCurrency, formatCurrencyInput, parseCurrencyBR } from "@/lib/utils";
+import { formatCurrency, formatCurrencyInput, parseCurrencyBR, parseDateSafe } from "@/lib/utils";
 
 interface EditarPericiaProps {
   pericia: any;
@@ -46,17 +46,17 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
     valor_causa: pericia.valor_causa ? formatCurrency(pericia.valor_causa) : "",
     perito: pericia.perito,
     status: pericia.status,
-    data_nomeacao: new Date(pericia.data_nomeacao),
-    data_pericia_agendada: pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada) : undefined,
+    data_nomeacao: parseDateSafe(pericia.data_nomeacao) || new Date(),
+    data_pericia_agendada: parseDateSafe(pericia.data_pericia_agendada),
     horario: pericia.horario || "",
     endereco: pericia.endereco || "",
     email_reclamante: pericia.email_reclamante || "",
     email_reclamada: pericia.email_reclamada || "",
-    data_prazo: pericia.data_prazo ? new Date(pericia.data_prazo) : undefined,
-    data_entrega: pericia.data_entrega ? new Date(pericia.data_entrega) : undefined,
-    prazo_esclarecimento: pericia.prazo_esclarecimento ? new Date(pericia.prazo_esclarecimento) : undefined,
-    data_esclarecimento: pericia.data_esclarecimento ? new Date(pericia.data_esclarecimento) : undefined,
-    data_recebimento: pericia.data_recebimento ? new Date(pericia.data_recebimento) : undefined,
+    data_prazo: parseDateSafe(pericia.data_prazo),
+    data_entrega: parseDateSafe(pericia.data_entrega),
+    prazo_esclarecimento: parseDateSafe(pericia.prazo_esclarecimento),
+    data_esclarecimento: parseDateSafe(pericia.data_esclarecimento),
+    data_recebimento: parseDateSafe(pericia.data_recebimento),
     valor_recebimento: pericia.valor_recebimento ? formatCurrency(pericia.valor_recebimento) : "",
     honorarios: pericia.honorarios ? formatCurrency(pericia.honorarios) : "",
     deslocamento: pericia.deslocamento || "",

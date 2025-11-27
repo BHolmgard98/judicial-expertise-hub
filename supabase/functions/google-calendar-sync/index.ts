@@ -80,11 +80,19 @@ function buildEquipmentList(nr15: number[]): string {
 }
 
 function buildEventDescription(pericia: PericiaData): string {
-  // Se for prazo de esclarecimento, descrição simplificada
-  if (pericia.tipo === 'prazo_esclarecimento') {
+  const tipo = pericia.tipo || 'pericia';
+  
+  // Se for prazo (entrega ou esclarecimento), descrição simplificada
+  if (tipo === 'prazo_esclarecimento') {
     return `Processo: ${pericia.numero_processo || 'Não informado'}
 Reclamante: ${pericia.requerente}
 Prazo para entrega de esclarecimentos.`.trim();
+  }
+  
+  if (tipo === 'prazo_entrega') {
+    return `Processo: ${pericia.numero_processo || 'Não informado'}
+Reclamante: ${pericia.requerente}
+Prazo para entrega do laudo pericial.`.trim();
   }
 
   const nr15Text = pericia.nr15 && pericia.nr15.length > 0
@@ -111,8 +119,9 @@ async function createCalendarEvent(pericia: PericiaData) {
   const accessToken = await getAccessToken();
 
   // Determina qual data usar baseado no tipo
-  const isPrazoEsclarecimento = pericia.tipo === 'prazo_esclarecimento';
-  const dateSource = isPrazoEsclarecimento ? pericia.data_prazo : pericia.data_pericia_agendada;
+  const tipo = pericia.tipo || 'pericia';
+  const isPrazo = tipo === 'prazo_esclarecimento' || tipo === 'prazo_entrega';
+  const dateSource = isPrazo ? pericia.data_prazo : pericia.data_pericia_agendada;
   
   if (!dateSource) {
     throw new Error('Data não informada');
@@ -121,19 +130,19 @@ async function createCalendarEvent(pericia: PericiaData) {
   // Garante que a data está no formato correto YYYY-MM-DD
   const dateOnly = dateSource.split('T')[0];
   
-  // Para prazo de esclarecimento, evento de dia inteiro ou horário padrão
+  // Para prazos, usa horário padrão
   // Para perícia, usa o horário informado
-  const timeString = isPrazoEsclarecimento ? '09:00' : (pericia.horario || '09:00').substring(0, 5);
+  const timeString = isPrazo ? '09:00' : (pericia.horario || '09:00').substring(0, 5);
   const startDateTime = `${dateOnly}T${timeString}:00`;
   
   // Calcula horário de término
   const [hours, minutes] = timeString.split(':');
-  let endHour = parseInt(hours) + (isPrazoEsclarecimento ? 1 : 2);
+  let endHour = parseInt(hours) + (isPrazo ? 1 : 2);
   if (endHour >= 24) endHour = 23;
   const endDateTime = `${dateOnly}T${endHour.toString().padStart(2, '0')}:${minutes}:00`;
 
   console.log('Date processing:', { 
-    tipo: pericia.tipo,
+    tipo,
     original: dateSource, 
     dateOnly, 
     timeString, 
@@ -142,9 +151,17 @@ async function createCalendarEvent(pericia: PericiaData) {
   });
 
   // Define o título do evento baseado no tipo
-  const summary = isPrazoEsclarecimento 
-    ? `PRAZO ESCLARECIMENTO - ${pericia.requerente}`
-    : `PERÍCIA - ${pericia.requerente}`;
+  let summary: string;
+  switch (tipo) {
+    case 'prazo_esclarecimento':
+      summary = `PRAZO ESCLARECIMENTO - ${pericia.requerente}`;
+      break;
+    case 'prazo_entrega':
+      summary = `PRAZO ENTREGA LAUDO - ${pericia.requerente}`;
+      break;
+    default:
+      summary = `PERÍCIA - ${pericia.requerente}`;
+  }
 
   const event = {
     summary,

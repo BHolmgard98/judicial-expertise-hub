@@ -56,6 +56,29 @@ export function parseCurrencyBR(value: string): number {
 }
 
 /**
+ * Cria um Date object a partir de uma string ISO date (YYYY-MM-DD)
+ * sem problemas de timezone. Adiciona T12:00:00 para evitar que
+ * UTC midnight seja convertido para o dia anterior no timezone local.
+ */
+export function parseDateSafe(dateString: string | null | undefined): Date | undefined {
+  if (!dateString) return undefined;
+  
+  // Remove qualquer parte de timezone se existir
+  const dateOnly = dateString.split('T')[0];
+  
+  // Divide a string de data em partes [ano, mês, dia]
+  const parts = dateOnly.split("-");
+  if (parts.length !== 3) return undefined;
+  
+  const year = parseInt(parts[0]);
+  const month = parseInt(parts[1]) - 1; // Mês é 0-indexed
+  const day = parseInt(parts[2]);
+  
+  // Cria Date object com timezone local explícito (meio-dia para evitar problemas)
+  return new Date(year, month, day, 12, 0, 0);
+}
+
+/**
  * Formata valor enquanto o usuário digita (padrão brasileiro)
  * Aplica formatação automaticamente: "1234.56" vira "1.234,56"
  */
