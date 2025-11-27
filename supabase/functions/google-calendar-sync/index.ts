@@ -100,15 +100,28 @@ ${equipment}`.trim();
 async function createCalendarEvent(pericia: PericiaData) {
   const accessToken = await getAccessToken();
 
+  // Garante que a data está no formato correto YYYY-MM-DD
+  // Remove qualquer parte de timezone que possa estar na string
+  const dateOnly = pericia.data_pericia_agendada.split('T')[0];
+  
   // Formata data e horário no formato correto para o Google Calendar
-  // Formato: YYYY-MM-DDTHH:MM:SS (sem Z, para respeitar o timezone)
+  // Formato: YYYY-MM-DDTHH:MM:SS (sem Z, para respeitar o timezone de São Paulo)
   const timeString = (pericia.horario || '09:00').substring(0, 5); // Pega apenas HH:MM
-  const startDateTime = `${pericia.data_pericia_agendada}T${timeString}:00`;
+  const startDateTime = `${dateOnly}T${timeString}:00`;
   
   // Calcula horário de término (2 horas depois)
   const [hours, minutes] = timeString.split(':');
-  const endHour = (parseInt(hours) + 2).toString().padStart(2, '0');
-  const endDateTime = `${pericia.data_pericia_agendada}T${endHour}:${minutes}:00`;
+  let endHour = parseInt(hours) + 2;
+  if (endHour >= 24) endHour = 23; // Evita horário inválido
+  const endDateTime = `${dateOnly}T${endHour.toString().padStart(2, '0')}:${minutes}:00`;
+
+  console.log('Date processing:', { 
+    original: pericia.data_pericia_agendada, 
+    dateOnly, 
+    timeString, 
+    startDateTime, 
+    endDateTime 
+  });
 
   const event = {
     summary: `PERÍCIA - ${pericia.requerente}`,

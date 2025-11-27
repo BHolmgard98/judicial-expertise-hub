@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatDateSafe } from "@/lib/utils";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -65,7 +66,7 @@ const AgendarPericia = () => {
     if (!pericia.data_pericia_agendada || !pericia.horario) {
       setSchedulingPericia(pericia);
       setScheduleData({
-        data: pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada) : undefined,
+        data: pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada + "T12:00:00") : undefined,
         horario: pericia.horario || ""
       });
       setScheduleDialogOpen(true);
@@ -280,10 +281,10 @@ const AgendarPericia = () => {
                     </TableCell>
                     <TableCell className="text-xs sm:text-sm max-w-[120px] truncate">{capitalizeWords(pericia.requerido)}</TableCell>
                     <TableCell className="text-xs sm:text-sm">
-                      {pericia.data_nomeacao ? new Date(pericia.data_nomeacao).toLocaleDateString("pt-BR") : "-"}
+                      {formatDateSafe(pericia.data_nomeacao)}
                     </TableCell>
                     <TableCell className="text-xs sm:text-sm">
-                      {pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada).toLocaleDateString("pt-BR") : "-"}
+                      {formatDateSafe(pericia.data_pericia_agendada)}
                     </TableCell>
                     <TableCell className="text-xs sm:text-sm">{pericia.horario || "-"}</TableCell>
                     <TableCell className="text-xs sm:text-sm max-w-[150px] truncate">{capitalizeWords(pericia.endereco || "-")}</TableCell>
