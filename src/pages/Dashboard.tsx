@@ -94,7 +94,7 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="varas" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
               <TabsTrigger value="varas">Varas</TabsTrigger>
               <TabsTrigger value="nrs">NRs</TabsTrigger>
               <TabsTrigger value="prazos">Prazos</TabsTrigger>

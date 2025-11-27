@@ -33,32 +33,32 @@ const DashboardLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-muted/20 to-background overflow-x-hidden">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
           <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-            <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SidebarTrigger />
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                  <Scale className="w-6 h-6 text-primary-foreground" />
+            <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <SidebarTrigger className="shrink-0" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                  <Scale className="w-4 h-4 sm:w-6 sm:h-6 text-primary-foreground" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">Dashboard de Perícias</h1>
-                  <p className="text-sm text-muted-foreground">Sistema de Gestão Judicial</p>
+                <div className="min-w-0">
+                  <h1 className="text-base sm:text-xl font-bold text-foreground truncate">Dashboard de Perícias</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Sistema de Gestão Judicial</p>
                 </div>
               </div>
-              <Button onClick={handleLogout} variant="outline" size="sm">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
+              <Button onClick={handleLogout} variant="outline" size="sm" className="shrink-0">
+                <LogOut className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Sair</span>
               </Button>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="container mx-auto px-4 py-8 flex-1">
+          <main className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 flex-1 overflow-x-auto">
             <Outlet />
           </main>
         </div>
