@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { formatDateSafe } from "@/lib/utils";
+import { formatDateSafe, parseDateSafe } from "@/lib/utils";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -66,7 +66,7 @@ const AgendarPericia = () => {
     if (!pericia.data_pericia_agendada || !pericia.horario) {
       setSchedulingPericia(pericia);
       setScheduleData({
-        data: pericia.data_pericia_agendada ? new Date(pericia.data_pericia_agendada + "T12:00:00") : undefined,
+        data: parseDateSafe(pericia.data_pericia_agendada),
         horario: pericia.horario || ""
       });
       setScheduleDialogOpen(true);
