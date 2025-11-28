@@ -358,12 +358,13 @@ const AgendarPericia = () => {
                     {scheduleData.data ? format(scheduleData.data, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent
                     mode="single"
                     selected={scheduleData.data}
                     onSelect={(date) => setScheduleData({ ...scheduleData, data: date })}
                     locale={ptBR}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
