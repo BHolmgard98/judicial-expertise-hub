@@ -9,6 +9,10 @@ interface VisualizarPericiaProps {
 }
 
 const VisualizarPericia = ({ pericia }: VisualizarPericiaProps) => {
+  if (!pericia) {
+    return null;
+  }
+
   const formatDate = (date: string | null) => {
     if (!date) return "-";
     return format(new Date(date), "dd/MM/yyyy");
