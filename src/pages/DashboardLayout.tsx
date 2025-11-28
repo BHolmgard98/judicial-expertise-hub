@@ -1,19 +1,33 @@
-import { useEffect } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LogOut, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import DeadlineAlertPopup from "@/components/dashboard/DeadlineAlertPopup";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const [showDeadlineAlert, setShowDeadlineAlert] = useState(false);
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Show popup only when landing on /dashboard (main page)
+    if (location.pathname === "/dashboard") {
+      const hasSeenAlert = sessionStorage.getItem("deadline_alert_seen");
+      if (!hasSeenAlert) {
+        setShowDeadlineAlert(true);
+        sessionStorage.setItem("deadline_alert_seen", "true");
+      }
+    }
+  }, [location.pathname]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -63,6 +77,10 @@ const DashboardLayout = () => {
           </main>
         </div>
       </div>
+      <DeadlineAlertPopup
+        open={showDeadlineAlert}
+        onOpenChange={setShowDeadlineAlert}
+      />
     </SidebarProvider>
   );
 };
