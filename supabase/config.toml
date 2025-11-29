@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.test-email]
 verify_jwt = false
+
+[functions.google-auth-url]
+verify_jwt = false
+
+[functions.google-auth-callback]
+verify_jwt = false
