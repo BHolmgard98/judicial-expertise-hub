@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { STATUS_OPTIONS } from "@/lib/statusColors";
@@ -346,24 +346,32 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
 
             <div className="space-y-2">
               <Label>Data da Perícia Agendada</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data_pericia_agendada
-                      ? format(formData.data_pericia_agendada, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_pericia_agendada
+                        ? format(formData.data_pericia_agendada, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_pericia_agendada}
+                      onSelect={(date) => setFormData({ ...formData, data_pericia_agendada: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.data_pericia_agendada && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_pericia_agendada: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_pericia_agendada}
-                    onSelect={(date) => setFormData({ ...formData, data_pericia_agendada: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -378,112 +386,152 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
 
             <div className="space-y-2">
               <Label>Prazo de Entrega do Laudo</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data_prazo
-                      ? format(formData.data_prazo, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_prazo
+                        ? format(formData.data_prazo, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_prazo}
+                      onSelect={(date) => setFormData({ ...formData, data_prazo: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.data_prazo && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_prazo: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_prazo}
-                    onSelect={(date) => setFormData({ ...formData, data_prazo: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Data de Entrega do Laudo</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data_entrega
-                      ? format(formData.data_entrega, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_entrega
+                        ? format(formData.data_entrega, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_entrega}
+                      onSelect={(date) => setFormData({ ...formData, data_entrega: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.data_entrega && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_entrega: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_entrega}
-                    onSelect={(date) => setFormData({ ...formData, data_entrega: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Prazo de Esclarecimento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.prazo_esclarecimento
-                      ? format(formData.prazo_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.prazo_esclarecimento
+                        ? format(formData.prazo_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.prazo_esclarecimento}
+                      onSelect={(date) => setFormData({ ...formData, prazo_esclarecimento: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.prazo_esclarecimento && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, prazo_esclarecimento: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.prazo_esclarecimento}
-                    onSelect={(date) => setFormData({ ...formData, prazo_esclarecimento: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Data de Esclarecimento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data_esclarecimento
-                      ? format(formData.data_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_esclarecimento
+                        ? format(formData.data_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_esclarecimento}
+                      onSelect={(date) => setFormData({ ...formData, data_esclarecimento: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.data_esclarecimento && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_esclarecimento: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_esclarecimento}
-                    onSelect={(date) => setFormData({ ...formData, data_esclarecimento: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Data de Recebimento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data_recebimento
-                      ? format(formData.data_recebimento, "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecione..."}
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_recebimento
+                        ? format(formData.data_recebimento, "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_recebimento}
+                      onSelect={(date) => setFormData({ ...formData, data_recebimento: date })}
+                      locale={ptBR}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formData.data_recebimento && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_recebimento: undefined })}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_recebimento}
-                    onSelect={(date) => setFormData({ ...formData, data_recebimento: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
           </div>
         </div>

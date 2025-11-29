@@ -16,6 +16,7 @@ import RecebimentoPorMesChart from "@/components/dashboard/charts/RecebimentoPor
 import RecebidoAReceberChart from "@/components/dashboard/charts/RecebidoAReceberChart";
 import NomeacoesStats from "@/components/dashboard/NomeacoesStats";
 import NomeacoesPorMesChart from "@/components/dashboard/charts/NomeacoesPorMesChart";
+import HonorariosRecebidosCard from "@/components/dashboard/HonorariosRecebidosCard";
 
 export interface FilterState {
   status: string;
@@ -86,6 +87,9 @@ const Dashboard = () => {
 
       {/* Charts */}
       <StatusChart filters={filters} />
+      
+      {/* Honorários Card - Only shows when filter is HONORÁRIOS RECEBIDOS */}
+      <HonorariosRecebidosCard filters={filters} />
 
       {/* Analytics Section */}
       <Card>
