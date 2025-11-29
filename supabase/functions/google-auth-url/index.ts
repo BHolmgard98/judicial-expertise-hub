@@ -13,7 +13,10 @@ serve(async (req) => {
   try {
     const { redirectUri } = await req.json();
     
+    console.log('Received redirectUri:', redirectUri);
+    
     const clientId = Deno.env.get('GOOGLE_CLIENTE_ID');
+    console.log('Client ID exists:', !!clientId);
     
     if (!clientId) {
       throw new Error('GOOGLE_CLIENTE_ID não configurado');
