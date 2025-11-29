@@ -7,6 +7,7 @@ import StatusChart from "@/components/dashboard/StatusChart";
 import PericiasTable from "@/components/dashboard/PericiasTable";
 import NovaPericia from "@/components/dashboard/NovaPericia";
 import ImportarPericias from "@/components/dashboard/ImportarPericias";
+import AtualizarPericias from "@/components/dashboard/AtualizarPericias";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NomeacoesPorVaraChart from "@/components/dashboard/charts/NomeacoesPorVaraChart";
@@ -52,8 +53,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Import Section */}
-      <ImportarPericias />
+      {/* Import & Update Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ImportarPericias />
+        <AtualizarPericias />
+      </div>
 
       {/* Stats */}
       <NomeacoesStats />
