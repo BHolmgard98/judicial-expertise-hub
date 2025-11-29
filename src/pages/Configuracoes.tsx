@@ -6,13 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Bell, Lock, Save, Loader2 } from "lucide-react";
+import { User, Mail, Bell, Lock, Save, Loader2, Send, CheckCircle2, XCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Configuracoes = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [userEmail, setUserEmail] = useState("");
   const [profile, setProfile] = useState({
     nome_perito: "",
@@ -125,6 +128,48 @@ const Configuracoes = () => {
     }
   };
 
+  const handleTestEmail = async () => {
+    if (!profile.email_notificacoes) {
+      toast({
+        title: "Email não configurado",
+        description: "Configure um email para notificações antes de testar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTestingEmail(true);
+    setEmailTestResult(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('test-email', {
+        body: { email: profile.email_notificacoes }
+      });
+
+      if (error) throw error;
+      
+      if (data.success) {
+        setEmailTestResult({ success: true, message: data.message });
+        toast({
+          title: "Email enviado!",
+          description: "Verifique sua caixa de entrada",
+        });
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || "Erro desconhecido";
+      setEmailTestResult({ success: false, message: errorMessage });
+      toast({
+        title: "Erro ao enviar email",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setTestingEmail(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -212,6 +257,43 @@ const Configuracoes = () => {
             <p className="text-xs text-muted-foreground">
               Você receberá alertas 3 dias antes de perícias agendadas, prazos de laudo e esclarecimentos
             </p>
+          </div>
+          
+          <Separator />
+          
+          <div className="space-y-3">
+            <Label>Validar Configuração de Email</Label>
+            <p className="text-sm text-muted-foreground">
+              Envie um email de teste para verificar se as notificações estão funcionando corretamente
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={handleTestEmail}
+              disabled={testingEmail || !profile.email_notificacoes}
+            >
+              {testingEmail ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Enviar Email de Teste
+                </>
+              )}
+            </Button>
+            
+            {emailTestResult && (
+              <Alert variant={emailTestResult.success ? "default" : "destructive"} className="mt-3">
+                {emailTestResult.success ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                <AlertDescription>{emailTestResult.message}</AlertDescription>
+              </Alert>
+            )}
           </div>
         </CardContent>
       </Card>
