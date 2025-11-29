@@ -16,8 +16,8 @@ interface StepProcessoProps {
 export const StepProcesso = ({ formData, setFormData }: StepProcessoProps) => {
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-sm sm:text-base border-b pb-2">Informações do Processo</h3>
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+      <h3 className="font-semibold text-sm border-b pb-2">Informações do Processo</h3>
+      <div className="grid gap-3 grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="numero_processo" className="text-xs">Número do Processo *</Label>
           <Input
