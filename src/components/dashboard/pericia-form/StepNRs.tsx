@@ -11,9 +11,9 @@ interface StepNRsProps {
 
 export const StepNRs = ({ nr15Selected, nr16Selected, onNr15Change, onNr16Change }: StepNRsProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 min-w-0 w-full">
       <h3 className="font-semibold text-sm border-b pb-2">NR's</h3>
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 min-w-0">
         <div className="space-y-2">
           <Label className="text-xs font-medium">NR15 - Insalubres</Label>
           <div className="grid grid-cols-1 gap-1 max-h-[150px] overflow-y-auto pr-1">

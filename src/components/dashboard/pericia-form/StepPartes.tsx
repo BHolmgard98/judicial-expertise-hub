@@ -8,9 +8,9 @@ interface StepPartesProps {
 
 export const StepPartes = ({ formData, setFormData }: StepPartesProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 min-w-0 w-full">
       <h3 className="font-semibold text-sm border-b pb-2">Partes</h3>
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 min-w-0">
         <div className="space-y-1">
           <Label htmlFor="requerente" className="text-xs">Reclamante *</Label>
           <Input

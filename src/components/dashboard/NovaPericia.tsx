@@ -203,19 +203,19 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
 
   return (
     <>
-      <DialogHeader>
+      <DialogHeader className="pr-8">
         <DialogTitle>Nova Perícia</DialogTitle>
         <DialogDescription>Preencha os dados da perícia em {FORM_STEPS.length} etapas</DialogDescription>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit} className="py-2 flex flex-col">
+      <form onSubmit={handleSubmit} className="py-2 flex flex-col min-w-0 w-full">
         <FormStepper
           steps={FORM_STEPS}
           currentStep={currentStep}
           onStepClick={setCurrentStep}
         />
 
-        <div className="flex-1">
+        <div className="flex-1 min-w-0 w-full">
           {renderStep()}
         </div>
 

@@ -11,7 +11,7 @@ interface StepOutrosProps {
 
 export const StepOutros = ({ formData, setFormData }: StepOutrosProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 min-w-0 w-full">
       <h3 className="font-semibold text-sm border-b pb-2">Observações e Outros</h3>
       
       <div className="space-y-1">
@@ -26,7 +26,7 @@ export const StepOutros = ({ formData, setFormData }: StepOutrosProps) => {
         />
       </div>
 
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 min-w-0">
         <div className="space-y-1">
           <Label className="text-xs">Deslocamento</Label>
           <Select
@@ -70,7 +70,7 @@ export const StepOutros = ({ formData, setFormData }: StepOutrosProps) => {
       </div>
 
       {formData.deslocamento === "TRANSPORTE PÚBLICO" && (
-        <div className="grid gap-3 grid-cols-3 pt-2 border-t">
+        <div className="grid gap-3 grid-cols-3 pt-2 border-t min-w-0">
           <div className="space-y-1">
             <Label htmlFor="estacao" className="text-xs">Estação</Label>
             <Input

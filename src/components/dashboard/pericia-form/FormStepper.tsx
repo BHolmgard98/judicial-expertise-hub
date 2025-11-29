@@ -38,9 +38,9 @@ export const FormStepper = ({ steps, currentStep, onStepClick }: FormStepperProp
       </p>
 
       {/* Desktop: Full stepper */}
-      <div className="hidden sm:flex items-center justify-between overflow-x-auto pb-2">
+      <div className="hidden sm:flex items-center justify-between pb-2 min-w-0 overflow-hidden">
         {steps.map((step, index) => (
-          <div key={step.number} className="flex items-center flex-shrink-0">
+          <div key={step.number} className="flex items-center min-w-0">
             <button
               type="button"
               onClick={() => onStepClick(step.number)}
