@@ -1,4 +1,4 @@
-import { Calendar, CalendarCheck, Clock, FileText, Gavel, CheckCircle, Archive, Home } from "lucide-react";
+import { Calendar, CalendarCheck, Clock, FileText, Gavel, CheckCircle, Archive, Home, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -25,6 +25,7 @@ const statusItems = [
   { title: "Sentença", url: "/dashboard/sentenca", icon: Gavel, status: "SENTENÇA", showCount: true },
   { title: "Recurso Ordinário", url: "/dashboard/recurso-ordinario", icon: FileText, status: "RECURSO ORDINÁRIO", showCount: true },
   { title: "Honorários Recebidos", url: "/dashboard/honorarios-recebidos", icon: CheckCircle, status: "HONORÁRIOS RECEBIDOS", showCount: true },
+  { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {

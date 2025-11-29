@@ -131,153 +131,163 @@ async function checkAndSendNotifications() {
 
   console.log('Checking notifications for date:', targetDate);
 
-  // Get user's email from Gmail API
-  const accessToken = await getAccessToken();
-  const profileResponse = await fetch('https://www.googleapis.com/gmail/v1/users/me/profile', {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
-  
-  if (!profileResponse.ok) {
-    throw new Error('Failed to get Gmail profile');
-  }
-  
-  const profile = await profileResponse.json();
-  const userEmail = profile.emailAddress;
-  console.log('Sending notifications to:', userEmail);
+  // Get all users with notification emails configured
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, email_notificacoes')
+    .not('email_notificacoes', 'is', null);
 
-  const notifications: { type: string; pericia: any }[] = [];
-
-  // 1. Check for pericias 3 days before
-  const { data: periciasAgendadas } = await supabase
-    .from('pericias')
-    .select('*')
-    .eq('data_pericia_agendada', targetDate)
-    .eq('status', 'AGUARDANDO PERÍCIA');
-
-  if (periciasAgendadas && periciasAgendadas.length > 0) {
-    for (const pericia of periciasAgendadas) {
-      notifications.push({ type: 'pericia', pericia });
-    }
+  if (!profiles || profiles.length === 0) {
+    console.log('No profiles with notification emails configured');
+    return { sent: 0 };
   }
 
-  // 2. Check for laudo deadlines 3 days before
-  const { data: laudosVencendo } = await supabase
-    .from('pericias')
-    .select('*')
-    .eq('data_prazo', targetDate)
-    .eq('status', 'AGUARDANDO LAUDO');
+  console.log(`Found ${profiles.length} profiles with notification emails`);
 
-  if (laudosVencendo && laudosVencendo.length > 0) {
-    for (const pericia of laudosVencendo) {
-      notifications.push({ type: 'laudo', pericia });
-    }
-  }
-
-  // 3. Check for esclarecimento deadlines 3 days before
-  const { data: esclarecimentosVencendo } = await supabase
-    .from('pericias')
-    .select('*')
-    .eq('prazo_esclarecimento', targetDate)
-    .eq('status', 'AGUARDANDO ESCLARECIMENTOS');
-
-  if (esclarecimentosVencendo && esclarecimentosVencendo.length > 0) {
-    for (const pericia of esclarecimentosVencendo) {
-      notifications.push({ type: 'esclarecimento', pericia });
-    }
-  }
-
-  console.log(`Found ${notifications.length} notifications to send`);
-
-  // Send emails for each notification
+  let totalSent = 0;
   const baseUrl = 'https://pyyezrimfirhvihbhbqg.lovableproject.com';
-  
-  for (const notification of notifications) {
-    const { type, pericia } = notification;
-    let subject = '';
-    let body = '';
 
-    const periciaLink = `${baseUrl}/dashboard/aguardando-${type === 'pericia' ? 'pericia' : type === 'laudo' ? 'laudo' : 'esclarecimentos'}`;
+  // Process notifications for each user
+  for (const userProfile of profiles) {
+    const userId = userProfile.id;
+    const userEmail = userProfile.email_notificacoes;
 
-    if (type === 'pericia') {
-      subject = `⚠️ LEMBRETE: Perícia em 3 dias - ${pericia.requerente}`;
-      body = `
-        <h2>Lembrete de Perícia Agendada</h2>
-        <p>Você tem uma perícia agendada para <strong>${formatDate(pericia.data_pericia_agendada)}</strong>.</p>
-        
-        <h3>Detalhes:</h3>
-        <ul>
-          <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
-          <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
-          <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
-          <li><strong>Função:</strong> ${pericia.funcao || 'Não informada'}</li>
-          <li><strong>Horário:</strong> ${pericia.horario || 'Não informado'}</li>
-          <li><strong>Local:</strong> ${pericia.endereco || 'Não informado'}</li>
-        </ul>
-        
-        ${pericia.nr15 && pericia.nr15.length > 0 ? `<p><strong>NR-15:</strong> Anexos ${pericia.nr15.join(', ')}</p>` : ''}
-        ${pericia.nr16 && pericia.nr16.length > 0 ? `<p><strong>NR-16:</strong> Anexos ${pericia.nr16.join(', ')}</p>` : ''}
-        
-        ${buildEquipmentList(pericia.nr15 || [])}
-        
-        ${pericia.observacoes ? `<p><strong>Observações:</strong> ${pericia.observacoes}</p>` : ''}
-        
-        ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
-        
-        <p><a href="${periciaLink}" style="background-color: #006dad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver no Sistema</a></p>
-      `;
-    } else if (type === 'laudo') {
-      subject = `⚠️ URGENTE: Prazo de entrega do laudo em 3 dias - ${pericia.requerente}`;
-      body = `
-        <h2>Prazo de Entrega do Laudo</h2>
-        <p>O prazo para entrega do laudo vence em <strong>${formatDate(pericia.data_prazo)}</strong>.</p>
-        
-        <h3>Detalhes:</h3>
-        <ul>
-          <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
-          <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
-          <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
-          <li><strong>Vara:</strong> ${pericia.vara}</li>
-        </ul>
-        
-        ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
-        
-        <p><a href="${periciaLink}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver Perícia</a></p>
-      `;
-    } else if (type === 'esclarecimento') {
-      subject = `⚠️ URGENTE: Prazo de esclarecimento em 3 dias - ${pericia.requerente}`;
-      body = `
-        <h2>Prazo de Entrega de Esclarecimentos</h2>
-        <p>O prazo para entrega dos esclarecimentos vence em <strong>${formatDate(pericia.prazo_esclarecimento)}</strong>.</p>
-        
-        <h3>Detalhes:</h3>
-        <ul>
-          <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
-          <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
-          <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
-          <li><strong>Vara:</strong> ${pericia.vara}</li>
-        </ul>
-        
-        ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
-        
-        <p><a href="${periciaLink}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver Perícia</a></p>
-      `;
+    if (!userEmail) continue;
+
+    const notifications: { type: string; pericia: any }[] = [];
+
+    // 1. Check for pericias 3 days before for this user
+    const { data: periciasAgendadas } = await supabase
+      .from('pericias')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('data_pericia_agendada', targetDate)
+      .eq('status', 'AGUARDANDO PERÍCIA');
+
+    if (periciasAgendadas && periciasAgendadas.length > 0) {
+      for (const pericia of periciasAgendadas) {
+        notifications.push({ type: 'pericia', pericia });
+      }
     }
 
-    try {
-      await sendGmailEmail({
-        to: userEmail,
-        subject,
-        body,
-      });
-      console.log(`Email sent for ${type}: ${pericia.numero_processo}`);
-    } catch (error) {
-      console.error(`Failed to send email for ${type}: ${pericia.numero_processo}`, error);
+    // 2. Check for laudo deadlines 3 days before for this user
+    const { data: laudosVencendo } = await supabase
+      .from('pericias')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('data_prazo', targetDate)
+      .eq('status', 'AGUARDANDO LAUDO');
+
+    if (laudosVencendo && laudosVencendo.length > 0) {
+      for (const pericia of laudosVencendo) {
+        notifications.push({ type: 'laudo', pericia });
+      }
+    }
+
+    // 3. Check for esclarecimento deadlines 3 days before for this user
+    const { data: esclarecimentosVencendo } = await supabase
+      .from('pericias')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('prazo_esclarecimento', targetDate)
+      .eq('status', 'AGUARDANDO ESCLARECIMENTOS');
+
+    if (esclarecimentosVencendo && esclarecimentosVencendo.length > 0) {
+      for (const pericia of esclarecimentosVencendo) {
+        notifications.push({ type: 'esclarecimento', pericia });
+      }
+    }
+
+    console.log(`Found ${notifications.length} notifications for user ${userId}`);
+
+    // Send emails for each notification
+    for (const notification of notifications) {
+      const { type, pericia } = notification;
+      let subject = '';
+      let body = '';
+
+      const periciaLink = `${baseUrl}/dashboard/aguardando-${type === 'pericia' ? 'pericia' : type === 'laudo' ? 'laudo' : 'esclarecimentos'}`;
+
+      if (type === 'pericia') {
+        subject = `⚠️ LEMBRETE: Perícia em 3 dias - ${pericia.requerente}`;
+        body = `
+          <h2>Lembrete de Perícia Agendada</h2>
+          <p>Você tem uma perícia agendada para <strong>${formatDate(pericia.data_pericia_agendada)}</strong>.</p>
+          
+          <h3>Detalhes:</h3>
+          <ul>
+            <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
+            <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
+            <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
+            <li><strong>Função:</strong> ${pericia.funcao || 'Não informada'}</li>
+            <li><strong>Horário:</strong> ${pericia.horario || 'Não informado'}</li>
+            <li><strong>Local:</strong> ${pericia.endereco || 'Não informado'}</li>
+          </ul>
+          
+          ${pericia.nr15 && pericia.nr15.length > 0 ? `<p><strong>NR-15:</strong> Anexos ${pericia.nr15.join(', ')}</p>` : ''}
+          ${pericia.nr16 && pericia.nr16.length > 0 ? `<p><strong>NR-16:</strong> Anexos ${pericia.nr16.join(', ')}</p>` : ''}
+          
+          ${buildEquipmentList(pericia.nr15 || [])}
+          
+          ${pericia.observacoes ? `<p><strong>Observações:</strong> ${pericia.observacoes}</p>` : ''}
+          
+          ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
+          
+          <p><a href="${periciaLink}" style="background-color: #006dad; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver no Sistema</a></p>
+        `;
+      } else if (type === 'laudo') {
+        subject = `⚠️ URGENTE: Prazo de entrega do laudo em 3 dias - ${pericia.requerente}`;
+        body = `
+          <h2>Prazo de Entrega do Laudo</h2>
+          <p>O prazo para entrega do laudo vence em <strong>${formatDate(pericia.data_prazo)}</strong>.</p>
+          
+          <h3>Detalhes:</h3>
+          <ul>
+            <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
+            <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
+            <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
+            <li><strong>Vara:</strong> ${pericia.vara}</li>
+          </ul>
+          
+          ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
+          
+          <p><a href="${periciaLink}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver Perícia</a></p>
+        `;
+      } else if (type === 'esclarecimento') {
+        subject = `⚠️ URGENTE: Prazo de esclarecimento em 3 dias - ${pericia.requerente}`;
+        body = `
+          <h2>Prazo de Entrega de Esclarecimentos</h2>
+          <p>O prazo para entrega dos esclarecimentos vence em <strong>${formatDate(pericia.prazo_esclarecimento)}</strong>.</p>
+          
+          <h3>Detalhes:</h3>
+          <ul>
+            <li><strong>Processo:</strong> ${pericia.numero_processo}</li>
+            <li><strong>Reclamante:</strong> ${pericia.requerente}</li>
+            <li><strong>Reclamada:</strong> ${pericia.requerido}</li>
+            <li><strong>Vara:</strong> ${pericia.vara}</li>
+          </ul>
+          
+          ${pericia.link_processo ? `<p><a href="${pericia.link_processo}">Ver processo no PJe</a></p>` : ''}
+          
+          <p><a href="${periciaLink}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Ver Perícia</a></p>
+        `;
+      }
+
+      try {
+        await sendGmailEmail({
+          to: userEmail,
+          subject,
+          body,
+        });
+        console.log(`Email sent for ${type}: ${pericia.numero_processo} to ${userEmail}`);
+        totalSent++;
+      } catch (error) {
+        console.error(`Failed to send email for ${type}: ${pericia.numero_processo}`, error);
+      }
     }
   }
 
-  return { sent: notifications.length };
+  return { sent: totalSent };
 }
 
 serve(async (req) => {

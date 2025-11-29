@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./pages/DashboardLayout";
 import AgendarPericia from "./pages/AgendarPericia";
 import StatusPage from "./pages/StatusPage";
+import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="sentenca" element={<StatusPage status="SENTENÇA" title="Sentença" />} />
             <Route path="recurso-ordinario" element={<StatusPage status="RECURSO ORDINÁRIO" title="Recurso Ordinário" />} />
             <Route path="honorarios-recebidos" element={<StatusPage status="HONORÁRIOS RECEBIDOS" title="Honorários Recebidos" />} />
+            <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
