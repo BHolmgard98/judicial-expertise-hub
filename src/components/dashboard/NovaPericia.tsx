@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, X } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { STATUS_OPTIONS } from "@/lib/statusColors";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { NR15_KEYS, NR16_KEYS, getNR15Label, getNR16Label } from "@/lib/nrAnexos";
-import { formatCurrencyInput, parseCurrencyBR } from "@/lib/utils";
+import { parseCurrencyBR } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import {
+  FormStepper,
+  FORM_STEPS,
+  StepProcesso,
+  StepPartes,
+  StepNRs,
+  StepAgendamento,
+  StepPrazos,
+  StepHonorarios,
+  StepOutros,
+} from "./pericia-form";
 
 interface NovaPericiaProps {
   onSuccess: (nr15: number[], nr16: number[]) => void;
@@ -24,6 +24,7 @@ interface NovaPericiaProps {
 const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [nr15Selected, setNr15Selected] = useState<number[]>([]);
   const [nr16Selected, setNr16Selected] = useState<number[]>([]);
   
@@ -70,8 +71,48 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     );
   };
 
+  const validateCurrentStep = (): boolean => {
+    switch (currentStep) {
+      case 1:
+        if (!formData.numero_processo || !formData.vara) {
+          toast({
+            title: "Campos obrigatórios",
+            description: "Preencha o número do processo e a vara",
+            variant: "destructive",
+          });
+          return false;
+        }
+        return true;
+      case 2:
+        if (!formData.requerente || !formData.requerido) {
+          toast({
+            title: "Campos obrigatórios",
+            description: "Preencha o reclamante e a reclamada",
+            variant: "destructive",
+          });
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      setCurrentStep(prev => Math.min(prev + 1, 7));
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateCurrentStep()) return;
+    
     setLoading(true);
 
     try {
@@ -132,503 +173,76 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     }
   };
 
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <StepProcesso formData={formData} setFormData={setFormData} />;
+      case 2:
+        return <StepPartes formData={formData} setFormData={setFormData} />;
+      case 3:
+        return (
+          <StepNRs
+            nr15Selected={nr15Selected}
+            nr16Selected={nr16Selected}
+            onNr15Change={handleNr15Change}
+            onNr16Change={handleNr16Change}
+          />
+        );
+      case 4:
+        return <StepAgendamento formData={formData} setFormData={setFormData} />;
+      case 5:
+        return <StepPrazos formData={formData} setFormData={setFormData} />;
+      case 6:
+        return <StepHonorarios formData={formData} setFormData={setFormData} />;
+      case 7:
+        return <StepOutros formData={formData} setFormData={setFormData} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>Nova Perícia</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit} className="space-y-6 py-4">
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">Informações do Processo</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="numero_processo">Número do Processo *</Label>
-              <Input
-                id="numero_processo"
-                value={formData.numero_processo}
-                onChange={(e) => setFormData({ ...formData, numero_processo: e.target.value })}
-                required
-              />
-            </div>
+      <form onSubmit={handleSubmit} className="py-4">
+        <FormStepper
+          steps={FORM_STEPS}
+          currentStep={currentStep}
+          onStepClick={setCurrentStep}
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="link_processo">Link do Processo</Label>
-              <Input
-                id="link_processo"
-                type="url"
-                placeholder="https://..."
-                value={formData.link_processo}
-                onChange={(e) => setFormData({ ...formData, link_processo: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cidade">Cidade</Label>
-              <Input
-                id="cidade"
-                value={formData.cidade}
-                onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="vara">Nº da Vara *</Label>
-              <Input
-                id="vara"
-                value={formData.vara}
-                onChange={(e) => setFormData({ ...formData, vara: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="funcao">Função</Label>
-              <Input
-                id="funcao"
-                value={formData.funcao}
-                onChange={(e) => setFormData({ ...formData, funcao: e.target.value })}
-              />
-            </div>
-          </div>
+        <div className="min-h-[300px]">
+          {renderStep()}
         </div>
 
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">Partes</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="requerente">Reclamante *</Label>
-              <Input
-                id="requerente"
-                value={formData.requerente}
-                onChange={(e) => setFormData({ ...formData, requerente: e.target.value })}
-                required
-              />
-            </div>
+        <div className="flex justify-between mt-6 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Anterior
+          </Button>
 
-            <div className="space-y-2">
-            <Label htmlFor="email_reclamante">Email Reclamante</Label>
-            <Input
-              id="email_reclamante"
-              type="text"
-              placeholder="email1@exemplo.com; email2@exemplo.com"
-              value={formData.email_reclamante}
-              onChange={(e) => setFormData({ ...formData, email_reclamante: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">Separe múltiplos emails por ponto e vírgula (;)</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="requerido">Reclamada *</Label>
-              <Input
-                id="requerido"
-                value={formData.requerido}
-                onChange={(e) => setFormData({ ...formData, requerido: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-            <Label htmlFor="email_reclamada">Email Reclamada</Label>
-            <Input
-              id="email_reclamada"
-              type="text"
-              placeholder="email1@exemplo.com; email2@exemplo.com"
-              value={formData.email_reclamada}
-              onChange={(e) => setFormData({ ...formData, email_reclamada: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">Separe múltiplos emails por ponto e vírgula (;)</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">Valores</h3>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="valor_causa">Valor da Causa (R$)</Label>
-              <Input
-                id="valor_causa"
-                type="text"
-                placeholder="1.234,56"
-                value={formData.valor_causa}
-                onChange={(e) => setFormData({ ...formData, valor_causa: formatCurrencyInput(e.target.value) })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="honorarios">Honorários (R$)</Label>
-              <Input
-                id="honorarios"
-                type="text"
-                placeholder="1.234,56"
-                value={formData.honorarios}
-                onChange={(e) => setFormData({ ...formData, honorarios: formatCurrencyInput(e.target.value) })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valor_recebimento">Valor do Recebimento (R$)</Label>
-              <Input
-                id="valor_recebimento"
-                type="text"
-                placeholder="1.234,56"
-                value={formData.valor_recebimento}
-                onChange={(e) => setFormData({ ...formData, valor_recebimento: formatCurrencyInput(e.target.value) })}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">NR's</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>NR15</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {NR15_KEYS.map((anexo) => (
-                  <div key={anexo} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`nr15-${anexo}`}
-                      checked={nr15Selected.includes(anexo)}
-                      onCheckedChange={() => handleNr15Change(anexo)}
-                    />
-                    <label htmlFor={`nr15-${anexo}`} className="text-sm">
-                      {anexo} - {getNR15Label(anexo)}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>NR16</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {NR16_KEYS.map((anexo) => (
-                  <div key={anexo} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`nr16-${anexo}`}
-                      checked={nr16Selected.includes(anexo)}
-                      onCheckedChange={() => handleNr16Change(anexo)}
-                    />
-                    <label htmlFor={`nr16-${anexo}`} className="text-sm">
-                      {anexo} - {getNR16Label(anexo)}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">Datas e Horários</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Data de Nomeação *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(formData.data_nomeacao, "dd/MM/yyyy", { locale: ptBR })}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <Calendar
-                    mode="single"
-                    selected={formData.data_nomeacao}
-                    onSelect={(date) => date && setFormData({ ...formData, data_nomeacao: date })}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Data da Perícia Agendada</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data_pericia_agendada
-                        ? format(formData.data_pericia_agendada, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.data_pericia_agendada}
-                      onSelect={(date) => setFormData({ ...formData, data_pericia_agendada: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.data_pericia_agendada && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_pericia_agendada: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="horario">Horário</Label>
-              <Input
-                id="horario"
-                type="time"
-                value={formData.horario}
-                onChange={(e) => setFormData({ ...formData, horario: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Prazo de Entrega do Laudo</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data_prazo
-                        ? format(formData.data_prazo, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.data_prazo}
-                      onSelect={(date) => setFormData({ ...formData, data_prazo: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.data_prazo && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_prazo: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Data de Entrega do Laudo</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data_entrega
-                        ? format(formData.data_entrega, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.data_entrega}
-                      onSelect={(date) => setFormData({ ...formData, data_entrega: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.data_entrega && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_entrega: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Prazo de Esclarecimento</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.prazo_esclarecimento
-                        ? format(formData.prazo_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.prazo_esclarecimento}
-                      onSelect={(date) => setFormData({ ...formData, prazo_esclarecimento: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.prazo_esclarecimento && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, prazo_esclarecimento: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Data de Esclarecimento</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data_esclarecimento
-                        ? format(formData.data_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.data_esclarecimento}
-                      onSelect={(date) => setFormData({ ...formData, data_esclarecimento: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.data_esclarecimento && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_esclarecimento: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Data de Recebimento</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data_recebimento
-                        ? format(formData.data_recebimento, "dd/MM/yyyy", { locale: ptBR })
-                        : "Selecione..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={formData.data_recebimento}
-                      onSelect={(date) => setFormData({ ...formData, data_recebimento: date })}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {formData.data_recebimento && (
-                  <Button type="button" variant="outline" size="icon" onClick={() => setFormData({ ...formData, data_recebimento: undefined })}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg border-b pb-2">Informações Adicionais</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="status">Status *</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="endereco">Endereço</Label>
-              <Input
-                id="endereco"
-                value={formData.endereco}
-                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="deslocamento">Deslocamento</Label>
-              <Select
-                value={formData.deslocamento}
-                onValueChange={(value) => setFormData({ ...formData, deslocamento: value })}
-              >
-                <SelectTrigger id="deslocamento">
-                  <SelectValue placeholder="Selecione o tipo de deslocamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Carro">Carro</SelectItem>
-                  <SelectItem value="Transporte Público">Transporte Público</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {formData.deslocamento === "Transporte Público" && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="estacao">Estação</Label>
-                  <Input
-                    id="estacao"
-                    placeholder="Ex: Guaianases"
-                    value={formData.estacao}
-                    onChange={(e) => setFormData({ ...formData, estacao: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="linha_numero">Nº Linha</Label>
-                  <Input
-                    id="linha_numero"
-                    placeholder="Ex: Linha 11"
-                    value={formData.linha_numero}
-                    onChange={(e) => setFormData({ ...formData, linha_numero: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="linha_cor">Cor</Label>
-                  <Input
-                    id="linha_cor"
-                    placeholder="Ex: Coral"
-                    value={formData.linha_cor}
-                    onChange={(e) => setFormData({ ...formData, linha_cor: e.target.value })}
-                  />
-                </div>
-              </>
+          <div className="flex gap-2">
+            {currentStep < 7 ? (
+              <Button type="button" onClick={handleNext}>
+                Próximo
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button type="submit" disabled={loading}>
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? "Salvando..." : "Adicionar Perícia"}
+              </Button>
             )}
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observacoes">Observações</Label>
-              <Textarea
-                id="observacoes"
-                value={formData.observacoes}
-                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                rows={3}
-              />
-            </div>
           </div>
         </div>
-
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Cadastrando..." : "Adicionar Perícia"}
-        </Button>
       </form>
     </>
   );

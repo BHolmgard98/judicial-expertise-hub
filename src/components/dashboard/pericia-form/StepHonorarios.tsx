@@ -1,0 +1,80 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, X } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { formatCurrencyInput } from "@/lib/utils";
+
+interface StepHonorariosProps {
+  formData: any;
+  setFormData: (data: any) => void;
+}
+
+export const StepHonorarios = ({ formData, setFormData }: StepHonorariosProps) => {
+  return (
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg border-b pb-2">Honorários</h3>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="honorarios">Honorários (R$)</Label>
+          <Input
+            id="honorarios"
+            type="text"
+            placeholder="1.234,56"
+            value={formData.honorarios}
+            onChange={(e) => setFormData({ ...formData, honorarios: formatCurrencyInput(e.target.value) })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="valor_recebimento">Valor do Recebimento (R$)</Label>
+          <Input
+            id="valor_recebimento"
+            type="text"
+            placeholder="1.234,56"
+            value={formData.valor_recebimento}
+            onChange={(e) => setFormData({ ...formData, valor_recebimento: formatCurrencyInput(e.target.value) })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Data de Recebimento</Label>
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.data_recebimento
+                    ? format(formData.data_recebimento, "dd/MM/yyyy", { locale: ptBR })
+                    : "Selecione..."}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.data_recebimento}
+                  onSelect={(date) => setFormData({ ...formData, data_recebimento: date })}
+                  locale={ptBR}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {formData.data_recebimento && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setFormData({ ...formData, data_recebimento: undefined })}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
