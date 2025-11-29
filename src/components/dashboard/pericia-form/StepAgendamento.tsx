@@ -15,8 +15,8 @@ interface StepAgendamentoProps {
 export const StepAgendamento = ({ formData, setFormData }: StepAgendamentoProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg border-b pb-2">Data e Horário da Perícia</h3>
-      <div className="grid gap-4 md:grid-cols-2">
+      <h3 className="font-semibold text-base sm:text-lg border-b pb-2">Data e Horário da Perícia</h3>
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Data da Perícia Agendada</Label>
           <div className="flex gap-2">

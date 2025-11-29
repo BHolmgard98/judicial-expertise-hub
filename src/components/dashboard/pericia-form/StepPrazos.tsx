@@ -41,8 +41,8 @@ const DaysRemainingBadge = ({ days }: { days: number | null }) => {
 export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg border-b pb-2">Prazos</h3>
-      <div className="grid gap-4 md:grid-cols-2">
+      <h3 className="font-semibold text-base sm:text-lg border-b pb-2">Prazos</h3>
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-2">
           <div className="flex items-center">
             <Label>Prazo de Entrega do Laudo</Label>
