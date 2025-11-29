@@ -317,31 +317,34 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
           onStepClick={setCurrentStep}
         />
 
-        <div className="min-h-[300px]">
+        <div className="min-h-[250px] sm:min-h-[300px]">
           {renderStep()}
         </div>
 
-        <div className="flex justify-between mt-6 pt-4 border-t">
+        <div className="flex justify-between mt-4 sm:mt-6 pt-4 border-t gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1}
+            size="sm"
+            className="sm:size-default"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Anterior
+            <ChevronLeft className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Anterior</span>
           </Button>
 
           <div className="flex gap-2">
             {currentStep < 7 ? (
-              <Button type="button" onClick={handleNext}>
-                Próximo
-                <ChevronRight className="h-4 w-4 ml-2" />
+              <Button type="button" onClick={handleNext} size="sm" className="sm:size-default">
+                <span className="hidden sm:inline">Próximo</span>
+                <ChevronRight className="h-4 w-4 sm:ml-2" />
               </Button>
             ) : (
-              <Button type="submit" disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? "Salvando..." : "Salvar Alterações"}
+              <Button type="submit" disabled={loading} size="sm" className="sm:size-default">
+                <Save className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{loading ? "Salvando..." : "Salvar Alterações"}</span>
+                <span className="sm:hidden">{loading ? "..." : "Salvar"}</span>
               </Button>
             )}
           </div>

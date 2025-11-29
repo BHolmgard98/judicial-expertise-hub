@@ -12,11 +12,11 @@ interface StepNRsProps {
 export const StepNRs = ({ nr15Selected, nr16Selected, onNr15Change, onNr16Change }: StepNRsProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg border-b pb-2">NR's</h3>
-      <div className="grid gap-6 md:grid-cols-2">
+      <h3 className="font-semibold text-base sm:text-lg border-b pb-2">NR's</h3>
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2">
         <div className="space-y-3">
-          <Label className="text-base font-medium">NR15 - Atividades e Operações Insalubres</Label>
-          <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2">
+          <Label className="text-sm sm:text-base font-medium">NR15 - Insalubres</Label>
+          <div className="grid grid-cols-1 gap-1.5 sm:gap-2 max-h-[200px] sm:max-h-[300px] overflow-y-auto pr-2">
             {NR15_KEYS.map((anexo) => (
               <div key={anexo} className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50">
                 <Checkbox
@@ -33,8 +33,8 @@ export const StepNRs = ({ nr15Selected, nr16Selected, onNr15Change, onNr16Change
         </div>
 
         <div className="space-y-3">
-          <Label className="text-base font-medium">NR16 - Atividades e Operações Perigosas</Label>
-          <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2">
+          <Label className="text-sm sm:text-base font-medium">NR16 - Perigosas</Label>
+          <div className="grid grid-cols-1 gap-1.5 sm:gap-2 max-h-[200px] sm:max-h-[300px] overflow-y-auto pr-2">
             {NR16_KEYS.map((anexo) => (
               <div key={anexo} className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50">
                 <Checkbox
