@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Bell, Lock, Save, Loader2, Send, CheckCircle2, XCircle } from "lucide-react";
+import { User, Mail, Bell, Lock, Save, Loader2, Send, CheckCircle2, XCircle, KeyRound } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Configuracoes = () => {
@@ -15,6 +15,7 @@ const Configuracoes = () => {
   const [saving, setSaving] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
+  const [authorizingGoogle, setAuthorizingGoogle] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [userEmail, setUserEmail] = useState("");
   const [profile, setProfile] = useState({
@@ -167,6 +168,32 @@ const Configuracoes = () => {
       });
     } finally {
       setTestingEmail(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setAuthorizingGoogle(true);
+    try {
+      const redirectUri = `${window.location.origin}/google-auth-callback`;
+      
+      const { data, error } = await supabase.functions.invoke('google-auth-url', {
+        body: { redirectUri }
+      });
+
+      if (error) throw error;
+
+      if (data.authUrl) {
+        window.location.href = data.authUrl;
+      } else {
+        throw new Error('URL de autorização não gerada');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+      setAuthorizingGoogle(false);
     }
   };
 
@@ -326,6 +353,43 @@ const Configuracoes = () => {
                 </>
               ) : (
                 "Enviar Link de Redefinição"
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5" />
+            Integração Google
+          </CardTitle>
+          <CardDescription>
+            Autorizar acesso ao Gmail e Google Calendar
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Reautorizar Aplicação</Label>
+            <p className="text-sm text-muted-foreground mb-2">
+              Se o envio de emails não está funcionando, clique abaixo para reautorizar o acesso ao Gmail com as permissões necessárias.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={handleGoogleAuth}
+              disabled={authorizingGoogle}
+            >
+              {authorizingGoogle ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Redirecionando...
+                </>
+              ) : (
+                <>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Autorizar Google
+                </>
               )}
             </Button>
           </div>
