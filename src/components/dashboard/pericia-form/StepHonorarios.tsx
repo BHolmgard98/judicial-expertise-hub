@@ -16,8 +16,8 @@ interface StepHonorariosProps {
 export const StepHonorarios = ({ formData, setFormData }: StepHonorariosProps) => {
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-sm sm:text-base border-b pb-2">Honorários</h3>
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-3">
+      <h3 className="font-semibold text-sm border-b pb-2">Honorários</h3>
+      <div className="grid gap-3 grid-cols-3">
         <div className="space-y-1">
           <Label htmlFor="honorarios" className="text-xs">Honorários (R$)</Label>
           <Input
