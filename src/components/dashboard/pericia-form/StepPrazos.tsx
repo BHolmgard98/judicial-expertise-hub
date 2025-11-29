@@ -27,32 +27,32 @@ const DaysRemainingBadge = ({ days }: { days: number | null }) => {
   return (
     <span
       className={cn(
-        "ml-2 px-2 py-0.5 rounded-full text-xs font-medium",
+        "ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap",
         isOverdue && "bg-destructive/20 text-destructive",
         isUrgent && !isOverdue && "bg-yellow-500/20 text-yellow-700",
         !isOverdue && !isUrgent && "bg-green-500/20 text-green-700"
       )}
     >
-      {isOverdue ? `${Math.abs(days)} dias atrasado` : `${days} dias restantes`}
+      {isOverdue ? `${Math.abs(days)}d atraso` : `${days}d`}
     </span>
   );
 };
 
 export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-base sm:text-lg border-b pb-2">Prazos</h3>
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
-        <div className="space-y-2">
-          <div className="flex items-center">
-            <Label>Prazo de Entrega do Laudo</Label>
+    <div className="space-y-3">
+      <h3 className="font-semibold text-sm sm:text-base border-b pb-2">Prazos</h3>
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+        <div className="space-y-1">
+          <div className="flex items-center flex-wrap">
+            <Label className="text-xs">Prazo Entrega Laudo</Label>
             <DaysRemainingBadge days={getDaysRemaining(formData.data_prazo)} />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full justify-start h-8 text-sm">
+                  <CalendarIcon className="mr-2 h-3 w-3" />
                   {formData.data_prazo
                     ? format(formData.data_prazo, "dd/MM/yyyy", { locale: ptBR })
                     : "Selecione..."}
@@ -73,21 +73,22 @@ export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
                 type="button" 
                 variant="outline" 
                 size="icon" 
+                className="h-8 w-8 shrink-0"
                 onClick={() => setFormData({ ...formData, data_prazo: undefined })}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             )}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Data de Entrega do Laudo</Label>
-          <div className="flex gap-2">
+        <div className="space-y-1">
+          <Label className="text-xs">Data Entrega Laudo</Label>
+          <div className="flex gap-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full justify-start h-8 text-sm">
+                  <CalendarIcon className="mr-2 h-3 w-3" />
                   {formData.data_entrega
                     ? format(formData.data_entrega, "dd/MM/yyyy", { locale: ptBR })
                     : "Selecione..."}
@@ -108,24 +109,25 @@ export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
                 type="button" 
                 variant="outline" 
                 size="icon" 
+                className="h-8 w-8 shrink-0"
                 onClick={() => setFormData({ ...formData, data_entrega: undefined })}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             )}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center">
-            <Label>Prazo de Esclarecimento</Label>
+        <div className="space-y-1">
+          <div className="flex items-center flex-wrap">
+            <Label className="text-xs">Prazo Esclarecimento</Label>
             <DaysRemainingBadge days={getDaysRemaining(formData.prazo_esclarecimento)} />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full justify-start h-8 text-sm">
+                  <CalendarIcon className="mr-2 h-3 w-3" />
                   {formData.prazo_esclarecimento
                     ? format(formData.prazo_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
                     : "Selecione..."}
@@ -146,21 +148,22 @@ export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
                 type="button" 
                 variant="outline" 
                 size="icon" 
+                className="h-8 w-8 shrink-0"
                 onClick={() => setFormData({ ...formData, prazo_esclarecimento: undefined })}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             )}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Data de Entrega de Esclarecimento</Label>
-          <div className="flex gap-2">
+        <div className="space-y-1">
+          <Label className="text-xs">Data Entrega Esclarecimento</Label>
+          <div className="flex gap-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full justify-start h-8 text-sm">
+                  <CalendarIcon className="mr-2 h-3 w-3" />
                   {formData.data_esclarecimento
                     ? format(formData.data_esclarecimento, "dd/MM/yyyy", { locale: ptBR })
                     : "Selecione..."}
@@ -181,9 +184,10 @@ export const StepPrazos = ({ formData, setFormData }: StepPrazosProps) => {
                 type="button" 
                 variant="outline" 
                 size="icon" 
+                className="h-8 w-8 shrink-0"
                 onClick={() => setFormData({ ...formData, data_esclarecimento: undefined })}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             )}
           </div>

@@ -15,36 +15,38 @@ interface StepProcessoProps {
 
 export const StepProcesso = ({ formData, setFormData }: StepProcessoProps) => {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-base sm:text-lg border-b pb-2">Informações do Processo</h3>
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="numero_processo">Número do Processo *</Label>
+    <div className="space-y-3">
+      <h3 className="font-semibold text-sm sm:text-base border-b pb-2">Informações do Processo</h3>
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="numero_processo" className="text-xs">Número do Processo *</Label>
           <Input
             id="numero_processo"
             value={formData.numero_processo}
             onChange={(e) => setFormData({ ...formData, numero_processo: e.target.value })}
             required
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="link_processo">Link do Processo</Label>
+        <div className="space-y-1">
+          <Label htmlFor="link_processo" className="text-xs">Link do Processo</Label>
           <Input
             id="link_processo"
             type="url"
             placeholder="https://..."
             value={formData.link_processo}
             onChange={(e) => setFormData({ ...formData, link_processo: e.target.value })}
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Data de Nomeação *</Label>
+        <div className="space-y-1">
+          <Label className="text-xs">Data de Nomeação *</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
-                <CalendarIcon className="mr-2 h-4 w-4" />
+              <Button variant="outline" className="w-full justify-start h-8 text-sm">
+                <CalendarIcon className="mr-2 h-3 w-3" />
                 {format(formData.data_nomeacao, "dd/MM/yyyy", { locale: ptBR })}
               </Button>
             </PopoverTrigger>
@@ -60,51 +62,56 @@ export const StepProcesso = ({ formData, setFormData }: StepProcessoProps) => {
           </Popover>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cidade">Cidade</Label>
+        <div className="space-y-1">
+          <Label htmlFor="cidade" className="text-xs">Cidade</Label>
           <Input
             id="cidade"
             value={formData.cidade}
             onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="endereco">Endereço</Label>
+        <div className="space-y-1">
+          <Label htmlFor="endereco" className="text-xs">Endereço</Label>
           <Input
             id="endereco"
             value={formData.endereco}
             onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="vara">Nº da Vara *</Label>
+        <div className="space-y-1">
+          <Label htmlFor="vara" className="text-xs">Nº da Vara *</Label>
           <Input
             id="vara"
             value={formData.vara}
             onChange={(e) => setFormData({ ...formData, vara: e.target.value })}
             required
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="funcao">Função</Label>
+        <div className="space-y-1">
+          <Label htmlFor="funcao" className="text-xs">Função</Label>
           <Input
             id="funcao"
             value={formData.funcao}
             onChange={(e) => setFormData({ ...formData, funcao: e.target.value })}
+            className="h-8 text-sm"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="valor_causa">Valor da Causa (R$)</Label>
+        <div className="space-y-1">
+          <Label htmlFor="valor_causa" className="text-xs">Valor da Causa (R$)</Label>
           <Input
             id="valor_causa"
             type="text"
             placeholder="1.234,56"
             value={formData.valor_causa}
             onChange={(e) => setFormData({ ...formData, valor_causa: formatCurrencyInput(e.target.value) })}
+            className="h-8 text-sm"
           />
         </div>
       </div>
