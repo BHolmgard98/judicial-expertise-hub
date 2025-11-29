@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { parseCurrencyBR } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import {
@@ -205,43 +205,41 @@ const NovaPericia = ({ onSuccess }: NovaPericiaProps) => {
     <>
       <DialogHeader>
         <DialogTitle>Nova Perícia</DialogTitle>
+        <DialogDescription>Preencha os dados da perícia em {FORM_STEPS.length} etapas</DialogDescription>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit} className="py-4">
+      <form onSubmit={handleSubmit} className="py-2 flex flex-col">
         <FormStepper
           steps={FORM_STEPS}
           currentStep={currentStep}
           onStepClick={setCurrentStep}
         />
 
-        <div className="min-h-[250px] sm:min-h-[300px]">
+        <div className="flex-1">
           {renderStep()}
         </div>
 
-        <div className="flex justify-between mt-4 sm:mt-6 pt-4 border-t gap-2">
+        <div className="flex justify-between mt-4 pt-4 border-t gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            size="sm"
-            className="sm:size-default"
           >
-            <ChevronLeft className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Anterior</span>
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Anterior
           </Button>
 
           <div className="flex gap-2">
             {currentStep < 7 ? (
-              <Button type="button" onClick={handleNext} size="sm" className="sm:size-default">
-                <span className="hidden sm:inline">Próximo</span>
-                <ChevronRight className="h-4 w-4 sm:ml-2" />
+              <Button type="button" onClick={handleNext}>
+                Próximo
+                <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button type="submit" disabled={loading} size="sm" className="sm:size-default">
-                <Save className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">{loading ? "Salvando..." : "Adicionar Perícia"}</span>
-                <span className="sm:hidden">{loading ? "..." : "Salvar"}</span>
+              <Button type="submit" disabled={loading}>
+                <Save className="h-4 w-4 mr-1" />
+                {loading ? "Salvando..." : "Adicionar"}
               </Button>
             )}
           </div>

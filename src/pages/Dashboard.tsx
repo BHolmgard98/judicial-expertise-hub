@@ -76,7 +76,7 @@ const Dashboard = () => {
                 Nova Perícia
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-3xl h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
               <NovaPericia onSuccess={(nr15, nr16) => {
                 setOpen(false);
                 setFilters({ ...filters, nr15, nr16 });
