@@ -176,6 +176,8 @@ const Configuracoes = () => {
     try {
       const redirectUri = `${window.location.origin}/google-auth-callback`;
       
+      console.log('Sending redirectUri:', redirectUri);
+      
       const { data, error } = await supabase.functions.invoke('google-auth-url', {
         body: { redirectUri }
       });
@@ -183,6 +185,7 @@ const Configuracoes = () => {
       if (error) throw error;
 
       if (data.authUrl) {
+        console.log('Auth URL:', data.authUrl);
         window.location.href = data.authUrl;
       } else {
         throw new Error('URL de autorização não gerada');
