@@ -16,12 +16,12 @@ serve(async (req) => {
     const { message, conversationHistory = [] } = await req.json();
     console.log('Received message:', message);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     // Create Supabase client with service role for querying
@@ -30,9 +30,18 @@ serve(async (req) => {
     // System prompt with database schema
     const systemPrompt = `Você é um assistente de IA especializado em consultar o banco de dados de perícias judiciais.
 
+INSTRUÇÕES IMPORTANTES:
+- SEMPRE consulte o banco de dados antes de responder qualquer pergunta sobre perícias
+- Use a ferramenta query_pericias para buscar informações no banco de dados
+- Nunca invente ou assuma dados - consulte sempre o banco primeiro
+- Responda em português brasileiro de forma clara e objetiva
+- Formate os resultados de maneira legível
+- Se não encontrar resultados, informe claramente
+- Para consultas sobre NRs, lembre que são arrays e devem ser consultados adequadamente
+
 SCHEMA DO BANCO DE DADOS:
-- Tabela: pericias
-- Campos principais:
+Tabela: pericias
+Campos principais:
   * numero (integer): número da perícia
   * numero_processo (text): número do processo judicial
   * status (text): status atual da perícia
@@ -47,16 +56,12 @@ SCHEMA DO BANCO DE DADOS:
   * data_pericia_agendada (date): data da perícia
   * honorarios (numeric): valor dos honorários
   * valor_recebimento (numeric): valor recebido
+  * valor_causa (numeric): valor da causa
   * cidade (text): cidade
   * funcao (text): função do trabalhador
   * observacoes (text): observações
-
-INSTRUÇÕES:
-- Responda em português brasileiro de forma clara e objetiva
-- Quando o usuário perguntar sobre perícias, use as ferramentas disponíveis para consultar o banco
-- Formate os resultados de maneira legível
-- Se não encontrar resultados, informe claramente
-- Para consultas sobre NRs, lembre que são arrays e devem ser consultados adequadamente`;
+  * data_entrega (date): data de entrega do laudo
+  * data_recebimento (date): data de recebimento dos honorários`;
 
     const tools = [
       {
@@ -109,15 +114,15 @@ INSTRUÇÕES:
       { role: "user", content: message }
     ];
 
-    console.log('Calling Lovable AI Gateway...');
-    const openaiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    console.log('Calling OpenAI...');
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-4o-mini',
         messages,
         tools,
         tool_choice: 'auto',
@@ -126,12 +131,12 @@ INSTRUÇÕES:
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
-      console.error('Lovable AI Gateway error:', errorText);
-      throw new Error(`AI Gateway error: ${openaiResponse.status}`);
+      console.error('OpenAI error:', errorText);
+      throw new Error(`OpenAI API error: ${openaiResponse.status}`);
     }
 
     const openaiData = await openaiResponse.json();
-    console.log('Lovable AI response:', JSON.stringify(openaiData, null, 2));
+    console.log('OpenAI response:', JSON.stringify(openaiData, null, 2));
 
     const choice = openaiData.choices[0];
     const assistantMessage = choice.message;
@@ -219,20 +224,20 @@ INSTRUÇÕES:
           }
         ];
 
-        const finalResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        const finalResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
+            model: 'gpt-4o-mini',
             messages: finalMessages,
           }),
         });
 
         if (!finalResponse.ok) {
-          throw new Error('Failed to get final response from AI Gateway');
+          throw new Error('Failed to get final response from OpenAI');
         }
 
         const finalData = await finalResponse.json();
