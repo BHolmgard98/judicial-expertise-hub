@@ -18,6 +18,8 @@ const HonorariosRecebidosCard = ({ filters }: HonorariosRecebidosCardProps) => {
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalPericias, setTotalPericias] = useState(0);
   const [valorPorVara, setValorPorVara] = useState<VaraTotal[]>([]);
+  const [totalSentenca, setTotalSentenca] = useState(0);
+  const [mediaDiasEspera, setMediaDiasEspera] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -26,7 +28,7 @@ const HonorariosRecebidosCard = ({ filters }: HonorariosRecebidosCardProps) => {
   const fetchData = async () => {
     let query = supabase
       .from("pericias")
-      .select("vara, valor_recebimento, honorarios")
+      .select("vara, valor_recebimento, honorarios, data_nomeacao, data_recebimento")
       .eq("status", "HONORÁRIOS RECEBIDOS");
 
     if (filters.vara) query = query.eq("vara", filters.vara);
@@ -37,12 +39,34 @@ const HonorariosRecebidosCard = ({ filters }: HonorariosRecebidosCardProps) => {
     const { data: pericias } = await query;
 
     if (pericias) {
-      // Calculate total
+      // Calculate total recebido
       const total = pericias.reduce((acc, p) => {
         return acc + (p.valor_recebimento || p.honorarios || 0);
       }, 0);
       setTotalGeral(total);
       setTotalPericias(pericias.length);
+
+      // Calculate total sentença
+      const totalHonorarios = pericias.reduce((acc, p) => {
+        return acc + (p.honorarios || 0);
+      }, 0);
+      setTotalSentenca(totalHonorarios);
+
+      // Calculate média de dias de espera
+      const diasEspera = pericias
+        .filter(p => p.data_nomeacao && p.data_recebimento)
+        .map(p => {
+          const dataNomeacao = new Date(p.data_nomeacao);
+          const dataRecebimento = new Date(p.data_recebimento!);
+          const diffTime = Math.abs(dataRecebimento.getTime() - dataNomeacao.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays;
+        });
+      
+      const mediaDias = diasEspera.length > 0 
+        ? Math.round(diasEspera.reduce((acc, dias) => acc + dias, 0) / diasEspera.length)
+        : 0;
+      setMediaDiasEspera(mediaDias);
 
       // Calculate per vara
       const varaMap: Record<string, VaraTotal> = {};
@@ -74,6 +98,23 @@ const HonorariosRecebidosCard = ({ filters }: HonorariosRecebidosCardProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm text-muted-foreground">Total Valor Sentença</p>
+            <p className="text-2xl font-bold text-primary">{formatCurrency(totalSentenca)}</p>
+          </div>
+          
+          <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm text-muted-foreground">Total Valor Recebido</p>
+            <p className="text-2xl font-bold text-primary">{formatCurrency(totalGeral)}</p>
+          </div>
+
+          <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm text-muted-foreground">Média Tempo de Espera</p>
+            <p className="text-2xl font-bold text-primary">{mediaDiasEspera} dias</p>
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total de perícias com honorários recebidos</p>
