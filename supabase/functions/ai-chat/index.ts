@@ -147,114 +147,129 @@ Campos principais:
 
     // Check if tool calls were made
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
-      console.log('Processing tool calls...');
-      const toolCall = assistantMessage.tool_calls[0];
-      const functionName = toolCall.function.name;
-      const functionArgs = JSON.parse(toolCall.function.arguments);
+      console.log(`Processing ${assistantMessage.tool_calls.length} tool calls...`);
+      
+      // Process all tool calls in parallel
+      const toolResults = await Promise.all(
+        assistantMessage.tool_calls.map(async (toolCall: any) => {
+          const functionName = toolCall.function.name;
+          const functionArgs = JSON.parse(toolCall.function.arguments);
 
-      if (functionName === 'query_pericias') {
-        console.log('Querying pericias with filters:', functionArgs.filters);
-        console.log('Order by:', functionArgs.order_by);
-        
-        // Build Supabase query
-        let query = supabase.from('pericias').select('*');
-        
-        const filters = functionArgs.filters || {};
-        
-        if (filters.numero) {
-          query = query.eq('numero', filters.numero);
-        }
-        if (filters.numero_processo) {
-          query = query.ilike('numero_processo', `%${filters.numero_processo}%`);
-        }
-        if (filters.status) {
-          query = query.eq('status', filters.status);
-        }
-        if (filters.vara) {
-          query = query.ilike('vara', `%${filters.vara}%`);
-        }
-        if (filters.perito) {
-          query = query.ilike('perito', `%${filters.perito}%`);
-        }
-        if (filters.cidade) {
-          query = query.ilike('cidade', `%${filters.cidade}%`);
-        }
-        if (filters.requerente) {
-          query = query.ilike('requerente', `%${filters.requerente}%`);
-        }
-        if (filters.requerido) {
-          query = query.ilike('requerido', `%${filters.requerido}%`);
-        }
-        
-        // Handle NR arrays - check if all specified values are contained
-        if (filters.nr15_contains && filters.nr15_contains.length > 0) {
-          query = query.contains('nr15', filters.nr15_contains);
-        }
-        if (filters.nr16_contains && filters.nr16_contains.length > 0) {
-          query = query.contains('nr16', filters.nr16_contains);
-        }
-        
-        // Apply ordering if specified
-        if (functionArgs.order_by && functionArgs.order_by.column) {
-          query = query.order(functionArgs.order_by.column, { 
-            ascending: functionArgs.order_by.ascending !== false 
-          });
-        }
-        
-        query = query.limit(functionArgs.limit || 10);
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('Supabase query error:', error);
-          throw error;
-        }
+          if (functionName === 'query_pericias') {
+            console.log('Querying pericias with filters:', functionArgs.filters);
+            console.log('Order by:', functionArgs.order_by);
+            
+            // Build Supabase query
+            let query = supabase.from('pericias').select('*');
+            
+            const filters = functionArgs.filters || {};
+            
+            if (filters.numero) {
+              query = query.eq('numero', filters.numero);
+            }
+            if (filters.numero_processo) {
+              query = query.ilike('numero_processo', `%${filters.numero_processo}%`);
+            }
+            if (filters.status) {
+              query = query.eq('status', filters.status);
+            }
+            if (filters.vara) {
+              query = query.ilike('vara', `%${filters.vara}%`);
+            }
+            if (filters.perito) {
+              query = query.ilike('perito', `%${filters.perito}%`);
+            }
+            if (filters.cidade) {
+              query = query.ilike('cidade', `%${filters.cidade}%`);
+            }
+            if (filters.requerente) {
+              query = query.ilike('requerente', `%${filters.requerente}%`);
+            }
+            if (filters.requerido) {
+              query = query.ilike('requerido', `%${filters.requerido}%`);
+            }
+            
+            // Handle NR arrays - check if all specified values are contained
+            if (filters.nr15_contains && filters.nr15_contains.length > 0) {
+              query = query.contains('nr15', filters.nr15_contains);
+            }
+            if (filters.nr16_contains && filters.nr16_contains.length > 0) {
+              query = query.contains('nr16', filters.nr16_contains);
+            }
+            
+            // Apply ordering if specified
+            if (functionArgs.order_by && functionArgs.order_by.column) {
+              query = query.order(functionArgs.order_by.column, { 
+                ascending: functionArgs.order_by.ascending !== false 
+              });
+            }
+            
+            query = query.limit(functionArgs.limit || 10);
+            
+            const { data, error } = await query;
+            
+            if (error) {
+              console.error('Supabase query error:', error);
+              throw error;
+            }
 
-        console.log(`Found ${data?.length || 0} pericias`);
+            console.log(`Found ${data?.length || 0} pericias for tool call ${toolCall.id}`);
 
-        // Send results back to OpenAI for final response
-        const finalMessages = [
-          { role: "system", content: systemPrompt },
-          ...conversationHistory,
-          { role: "user", content: message },
-          assistantMessage,
-          {
-            role: "tool",
-            tool_call_id: toolCall.id,
-            content: JSON.stringify({ 
-              count: data?.length || 0, 
-              results: data 
-            })
+            return {
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: JSON.stringify({ 
+                count: data?.length || 0, 
+                results: data 
+              })
+            };
           }
-        ];
 
-        const finalResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: finalMessages,
-          }),
-        });
+          return null;
+        })
+      );
 
-        if (!finalResponse.ok) {
-          throw new Error('Failed to get final response from OpenAI');
-        }
+      // Filter out null results
+      const validToolResults = toolResults.filter(result => result !== null);
 
-        const finalData = await finalResponse.json();
-        const finalAnswer = finalData.choices[0].message.content;
+      // Send results back to OpenAI for final response
+      const finalMessages = [
+        { role: "system", content: systemPrompt },
+        ...conversationHistory,
+        { role: "user", content: message },
+        assistantMessage,
+        ...validToolResults
+      ];
 
-        return new Response(
-          JSON.stringify({ 
-            response: finalAnswer,
-            resultsCount: data?.length || 0
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      const finalResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: finalMessages,
+        }),
+      });
+
+      if (!finalResponse.ok) {
+        throw new Error('Failed to get final response from OpenAI');
       }
+
+      const finalData = await finalResponse.json();
+      const finalAnswer = finalData.choices[0].message.content;
+
+      return new Response(
+        JSON.stringify({ 
+          response: finalAnswer,
+          resultsCount: validToolResults.reduce((sum, result) => {
+            const parsed = JSON.parse(result.content);
+            return sum + (parsed.count || 0);
+          }, 0)
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // If no tool call, return direct response
