@@ -24,6 +24,7 @@ const statusItems = [
   { title: "Laudos/Esc. Entregues", url: "/dashboard/laudo-entregue", icon: CheckCircle, status: "LAUDO/ESCLARECIMENTOS ENTREGUES", showCount: true },
   { title: "Sentença", url: "/dashboard/sentenca", icon: Gavel, status: "SENTENÇA", showCount: true },
   { title: "Recurso Ordinário", url: "/dashboard/recurso-ordinario", icon: FileText, status: "RECURSO ORDINÁRIO", showCount: true },
+  { title: "Trânsito em Julgado", url: "/dashboard/transito-julgado", icon: Gavel, status: "CERTIDÃO DE TRÂNSITO EM JULGADO", showCount: true },
   { title: "Honorários Recebidos", url: "/dashboard/honorarios-recebidos", icon: CheckCircle, status: "HONORÁRIOS RECEBIDOS", showCount: true },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];

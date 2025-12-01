@@ -33,6 +33,7 @@ const App = () => (
             <Route path="laudo-entregue" element={<StatusPage status="LAUDO/ESCLARECIMENTOS ENTREGUES" title="Laudo/Esclarecimentos Entregues" />} />
             <Route path="sentenca" element={<StatusPage status="SENTENÇA" title="Sentença" />} />
             <Route path="recurso-ordinario" element={<StatusPage status="RECURSO ORDINÁRIO" title="Recurso Ordinário" />} />
+            <Route path="transito-julgado" element={<StatusPage status="CERTIDÃO DE TRÂNSITO EM JULGADO" title="Trânsito em Julgado" />} />
             <Route path="honorarios-recebidos" element={<StatusPage status="HONORÁRIOS RECEBIDOS" title="Honorários Recebidos" />} />
             <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
