@@ -24,6 +24,10 @@ interface EditarPericiaProps {
 }
 
 const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
+  if (!pericia) {
+    return null;
+  }
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,11 +35,6 @@ const EditarPericia = ({ pericia, onSuccess }: EditarPericiaProps) => {
   const [pendingUpdate, setPendingUpdate] = useState<any>(null);
   const [nr15Selected, setNr15Selected] = useState<number[]>(pericia?.nr15 || []);
   const [nr16Selected, setNr16Selected] = useState<number[]>(pericia?.nr16 || []);
-  
-  if (!pericia) {
-    return null;
-  }
-  
   const [formData, setFormData] = useState({
     numero_processo: pericia.numero_processo,
     link_processo: pericia.link_processo || "",
