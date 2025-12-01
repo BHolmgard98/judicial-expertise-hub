@@ -117,7 +117,7 @@ INSTRUÇÕES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-5-mini',
         messages,
         tools,
         tool_choice: 'auto',
@@ -226,7 +226,7 @@ INSTRUÇÕES:
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-5-mini-2025-08-07',
+            model: 'gpt-5-mini',
             messages: finalMessages,
           }),
         });
