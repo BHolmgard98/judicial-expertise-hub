@@ -37,7 +37,7 @@ const PericiasTable = ({ filters, exactNrMatch = false }: PericiasTableProps) =>
   useEffect(() => {
     fetchPericias();
     setCurrentPage(1); // Reset para página 1 ao mudar filtros
-  }, [filters, sortColumn, sortDirection]);
+  }, [filters, sortColumn, sortDirection, exactNrMatch]);
 
   const fetchPericias = async () => {
     let query = supabase.from("pericias").select("*");
