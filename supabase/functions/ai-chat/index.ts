@@ -63,7 +63,7 @@ INSTRUÇÕES:
         type: "function",
         function: {
           name: "query_pericias",
-          description: "Consulta perícias no banco de dados com filtros específicos",
+          description: "Consulta perícias no banco de dados com filtros e ordenação",
           parameters: {
             type: "object",
             properties: {
@@ -78,6 +78,21 @@ INSTRUÇÕES:
                   nr15_contains: { type: "array", items: { type: "integer" }, description: "Anexos NR15 que devem estar presentes" },
                   nr16_contains: { type: "array", items: { type: "integer" }, description: "Anexos NR16 que devem estar presentes" },
                   perito: { type: "string", description: "Nome do perito" },
+                  cidade: { type: "string", description: "Cidade" },
+                  requerente: { type: "string", description: "Parte requerente" },
+                  requerido: { type: "string", description: "Parte requerida" },
+                }
+              },
+              order_by: {
+                type: "object",
+                description: "Ordenação dos resultados",
+                properties: {
+                  column: { 
+                    type: "string", 
+                    enum: ["numero", "data_nomeacao", "honorarios", "valor_recebimento", "valor_causa", "data_prazo", "data_pericia_agendada"],
+                    description: "Coluna para ordenar" 
+                  },
+                  ascending: { type: "boolean", description: "true para ordem crescente, false para decrescente" }
                 }
               },
               limit: { type: "integer", description: "Limite de resultados (padrão: 10)" }
@@ -130,6 +145,7 @@ INSTRUÇÕES:
 
       if (functionName === 'query_pericias') {
         console.log('Querying pericias with filters:', functionArgs.filters);
+        console.log('Order by:', functionArgs.order_by);
         
         // Build Supabase query
         let query = supabase.from('pericias').select('*');
@@ -151,6 +167,15 @@ INSTRUÇÕES:
         if (filters.perito) {
           query = query.ilike('perito', `%${filters.perito}%`);
         }
+        if (filters.cidade) {
+          query = query.ilike('cidade', `%${filters.cidade}%`);
+        }
+        if (filters.requerente) {
+          query = query.ilike('requerente', `%${filters.requerente}%`);
+        }
+        if (filters.requerido) {
+          query = query.ilike('requerido', `%${filters.requerido}%`);
+        }
         
         // Handle NR arrays - check if all specified values are contained
         if (filters.nr15_contains && filters.nr15_contains.length > 0) {
@@ -158,6 +183,13 @@ INSTRUÇÕES:
         }
         if (filters.nr16_contains && filters.nr16_contains.length > 0) {
           query = query.contains('nr16', filters.nr16_contains);
+        }
+        
+        // Apply ordering if specified
+        if (functionArgs.order_by && functionArgs.order_by.column) {
+          query = query.order(functionArgs.order_by.column, { 
+            ascending: functionArgs.order_by.ascending !== false 
+          });
         }
         
         query = query.limit(functionArgs.limit || 10);
