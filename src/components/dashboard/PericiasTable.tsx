@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, MapPin, FileDown } from "lucide-react";
+import { Eye, Pencil, Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, MapPin, FileDown, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { FilterState } from "@/pages/Dashboard";
@@ -14,13 +14,15 @@ import VisualizarPericia from "./VisualizarPericia";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/statusColors";
 import { formatDateSafe } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import { exportToExcel } from "@/lib/excelExport";
 
 interface PericiasTableProps {
   filters: FilterState;
+  exactNrMatch?: boolean;
 }
 
-const PericiasTable = ({ filters }: PericiasTableProps) => {
+const PericiasTable = ({ filters, exactNrMatch = false }: PericiasTableProps) => {
   const [pericias, setPericias] = useState<any[]>([]);
   const [editingPericia, setEditingPericia] = useState<any>(null);
   const [viewingPericia, setViewingPericia] = useState<any>(null);
@@ -30,6 +32,7 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPericias();
@@ -79,7 +82,28 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
     }
 
     const { data } = await query;
-    if (data) setPericias(data);
+    
+    if (data) {
+      // Se exactNrMatch está ativo, filtra para NRs exatas
+      if (exactNrMatch && (filters.nr15.length > 0 || filters.nr16.length > 0)) {
+        const filtered = data.filter(pericia => {
+          const nr15Match = filters.nr15.length === 0 || 
+            (pericia.nr15?.length === filters.nr15.length && 
+             filters.nr15.every(nr => pericia.nr15?.includes(nr)) &&
+             pericia.nr15?.every((nr: number) => filters.nr15.includes(nr)));
+          
+          const nr16Match = filters.nr16.length === 0 || 
+            (pericia.nr16?.length === filters.nr16.length && 
+             filters.nr16.every(nr => pericia.nr16?.includes(nr)) &&
+             pericia.nr16?.every((nr: number) => filters.nr16.includes(nr)));
+          
+          return nr15Match && nr16Match;
+        });
+        setPericias(filtered);
+      } else {
+        setPericias(data);
+      }
+    }
   };
 
   const handleSort = (column: "numero" | "vara" | "data_nomeacao" | "data_prazo") => {
@@ -186,6 +210,22 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleFilterSimilar = (pericia: any) => {
+    const exactNr15 = pericia.nr15 || [];
+    const exactNr16 = pericia.nr16 || [];
+    
+    navigate("/dashboard", {
+      state: {
+        filters: {
+          status: "LAUDO/ESCLARECIMENTOS ENTREGUES",
+          nr15: exactNr15,
+          nr16: exactNr16,
+        },
+        exactNrMatch: true,
+      }
+    });
   };
 
   // Cálculos de paginação
@@ -372,6 +412,16 @@ const PericiasTable = ({ filters }: PericiasTableProps) => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
+                        {filters.status === "AGUARDANDO PERÍCIA" && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleFilterSimilar(pericia)}
+                            title="Buscar perícias similares entregues"
+                          >
+                            <Filter className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="icon"

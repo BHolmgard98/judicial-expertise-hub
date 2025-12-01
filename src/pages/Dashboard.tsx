@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -18,6 +18,7 @@ import RecebidoAReceberChart from "@/components/dashboard/charts/RecebidoARecebe
 import NomeacoesStats from "@/components/dashboard/NomeacoesStats";
 import NomeacoesPorMesChart from "@/components/dashboard/charts/NomeacoesPorMesChart";
 import HonorariosRecebidosCard from "@/components/dashboard/HonorariosRecebidosCard";
+import { useLocation } from "react-router-dom";
 
 export interface FilterState {
   status: string;
@@ -35,6 +36,7 @@ export interface FilterState {
 }
 
 const Dashboard = () => {
+  const location = useLocation();
   const [filters, setFilters] = useState<FilterState>({
     status: "",
     requerente: "",
@@ -50,6 +52,17 @@ const Dashboard = () => {
     prazoEsclarecimento: "",
   });
   const [open, setOpen] = useState(false);
+  const [exactNrMatch, setExactNrMatch] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.filters) {
+      setFilters(prev => ({
+        ...prev,
+        ...location.state.filters
+      }));
+      setExactNrMatch(location.state?.exactNrMatch || false);
+    }
+  }, [location]);
 
   return (
     <div className="space-y-6">
@@ -134,7 +147,7 @@ const Dashboard = () => {
       </Card>
 
       {/* Table */}
-      <PericiasTable filters={filters} />
+      <PericiasTable filters={filters} exactNrMatch={exactNrMatch} />
     </div>
   );
 };
