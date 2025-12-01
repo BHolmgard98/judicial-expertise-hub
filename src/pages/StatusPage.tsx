@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { formatDateSafe, formatCurrency } from "@/lib/utils";
-import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink, Eye, Pencil } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink, Eye, Pencil, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EditarPericia from "@/components/dashboard/EditarPericia";
@@ -58,6 +58,22 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
     }
 
     setPericias(data || []);
+  };
+
+  const handleFilterSimilar = (pericia: any) => {
+    const exactNr15 = pericia.nr15 || [];
+    const exactNr16 = pericia.nr16 || [];
+    
+    navigate("/dashboard", {
+      state: {
+        filters: {
+          status: "LAUDO/ESCLARECIMENTOS ENTREGUES",
+          nr15: exactNr15,
+          nr16: exactNr16,
+        },
+        exactNrMatch: true,
+      }
+    });
   };
 
   const handleSort = (field: SortField) => {
@@ -186,6 +202,14 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
                   <TableCell>{formatNRs(pericia.nr15, pericia.nr16)}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={() => handleFilterSimilar(pericia)}
+                        title="Buscar perícias similares entregues"
+                      >
+                        <Filter className="w-4 h-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => setViewingPericia(pericia)}>
                         <Eye className="w-4 h-4" />
                       </Button>
