@@ -38,6 +38,10 @@ INSTRUÇÕES IMPORTANTES:
 - Formate os resultados de maneira legível
 - Se não encontrar resultados, informe claramente
 - Para consultas sobre NRs, lembre que são arrays e devem ser consultados adequadamente
+- IMPORTANTE: Valores null significam campos vazios/não preenchidos
+- Ao buscar valores máximos, mínimos ou calcular médias, SEMPRE ignore registros com null
+- Use ordenação e filtragem para encontrar apenas registros com valores preenchidos
+- Ao responder sobre valores numéricos (honorários, valor_causa, etc), considere apenas os não-null
 
 SCHEMA DO BANCO DE DADOS:
 Tabela: pericias
