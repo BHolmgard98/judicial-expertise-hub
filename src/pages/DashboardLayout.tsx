@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import DeadlineAlertPopup from "@/components/dashboard/DeadlineAlertPopup";
+import { AIChat } from "@/components/AIChat";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ const DashboardLayout = () => {
         open={showDeadlineAlert}
         onOpenChange={setShowDeadlineAlert}
       />
+      <AIChat />
     </SidebarProvider>
   );
 };
