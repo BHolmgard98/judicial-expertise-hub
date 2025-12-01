@@ -16,12 +16,12 @@ serve(async (req) => {
     const { message, conversationHistory = [] } = await req.json();
     console.log('Received message:', message);
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     // Create Supabase client with service role for querying
@@ -109,15 +109,15 @@ INSTRUÇÕES:
       { role: "user", content: message }
     ];
 
-    console.log('Calling OpenAI...');
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Calling Lovable AI Gateway...');
+    const openaiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'google/gemini-2.5-flash',
         messages,
         tools,
         tool_choice: 'auto',
@@ -126,12 +126,12 @@ INSTRUÇÕES:
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
-      console.error('OpenAI error:', errorText);
-      throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      console.error('Lovable AI Gateway error:', errorText);
+      throw new Error(`AI Gateway error: ${openaiResponse.status}`);
     }
 
     const openaiData = await openaiResponse.json();
-    console.log('OpenAI response:', JSON.stringify(openaiData, null, 2));
+    console.log('Lovable AI response:', JSON.stringify(openaiData, null, 2));
 
     const choice = openaiData.choices[0];
     const assistantMessage = choice.message;
@@ -219,20 +219,20 @@ INSTRUÇÕES:
           }
         ];
 
-        const finalResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        const finalResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-5-mini',
+            model: 'google/gemini-2.5-flash',
             messages: finalMessages,
           }),
         });
 
         if (!finalResponse.ok) {
-          throw new Error('Failed to get final response from OpenAI');
+          throw new Error('Failed to get final response from AI Gateway');
         }
 
         const finalData = await finalResponse.json();
