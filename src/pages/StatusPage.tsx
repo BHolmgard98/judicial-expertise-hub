@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import VisualizarPericia from "@/components/dashboard/VisualizarPericia";
+import HonorariosRecebidosCard from "@/components/dashboard/HonorariosRecebidosCard";
 
 interface StatusPageProps {
   status: string;
@@ -369,6 +370,25 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
 
   return (
     <div className="space-y-6">
+      {status === "HONORÁRIOS RECEBIDOS" && (
+        <HonorariosRecebidosCard 
+          filters={{ 
+            status,
+            requerente: "",
+            vara: "",
+            nr15: [],
+            nr16: [],
+            ano: "",
+            mes: "",
+            dataNomeacao: "",
+            dataAgendada: "",
+            horario: "",
+            dataEntrega: "",
+            prazoEsclarecimento: ""
+          }} 
+        />
+      )}
+      
       <Card>
         <CardHeader>
           <CardTitle>Perícias - {title} ({pericias.length})</CardTitle>
