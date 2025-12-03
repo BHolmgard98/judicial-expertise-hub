@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ExternalLink, Calendar, Mail, Pencil, Trash2 } from "lucide-react";
+import { ExternalLink, Calendar, Mail, Pencil, Trash2, Route } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import { formatDateSafe, parseDateSafe } from "@/lib/utils";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const AgendarPericia = () => {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ const AgendarPericia = () => {
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [schedulingPericia, setSchedulingPericia] = useState<any>(null);
   const [scheduleData, setScheduleData] = useState({ data: undefined as Date | undefined, horario: "" });
+  const [selectedPericias, setSelectedPericias] = useState<Set<string>>(new Set());
+  const [sendingRoute, setSendingRoute] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -226,17 +229,101 @@ const AgendarPericia = () => {
     return nrs.join(" | ") || "-";
   };
 
+  const handleSelectAll = () => {
+    if (selectedPericias.size === pericias.length) {
+      setSelectedPericias(new Set());
+    } else {
+      setSelectedPericias(new Set(pericias.map(p => p.id)));
+    }
+  };
+
+  const handleSelectPericia = (id: string) => {
+    const newSelected = new Set(selectedPericias);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedPericias(newSelected);
+  };
+
+  const handleSendRoute = async () => {
+    if (selectedPericias.size === 0) {
+      toast({
+        title: "Nenhuma perícia selecionada",
+        description: "Selecione pelo menos uma perícia para traçar a rota.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingRoute(true);
+    
+    const selectedData = pericias
+      .filter(p => selectedPericias.has(p.id))
+      .map(p => ({
+        numero: p.numero,
+        endereco: p.endereco,
+        numero_processo: p.numero_processo,
+        requerente: p.requerente,
+        data_pericia_agendada: p.data_pericia_agendada,
+        horario: p.horario,
+      }));
+
+    try {
+      const response = await fetch("https://api.uloan.com.br/webhook/rotas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pericias: selectedData }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao enviar rotas");
+      }
+
+      toast({
+        title: "Rotas enviadas com sucesso",
+        description: `${selectedData.length} endereço(s) enviado(s) para o webhook.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar rotas",
+        description: "Não foi possível enviar os endereços para o webhook.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingRoute(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Perícias - Agendar Perícia</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Perícias - Agendar Perícia ({pericias.length})</CardTitle>
+          <Button
+            onClick={handleSendRoute}
+            disabled={sendingRoute || selectedPericias.size === 0}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Route className="w-4 h-4" />
+            Traçar Rota {selectedPericias.size > 0 && `(${selectedPericias.size})`}
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={pericias.length > 0 && selectedPericias.size === pericias.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("numero")}>
                     Nº {getSortIcon("numero")}
                   </TableHead>
@@ -261,6 +348,12 @@ const AgendarPericia = () => {
               <TableBody>
                 {pericias.map((pericia) => (
                   <TableRow key={pericia.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPericias.has(pericia.id)}
+                        onCheckedChange={() => handleSelectPericia(pericia.id)}
+                      />
+                    </TableCell>
                     <TableCell className="text-xs sm:text-sm">{pericia.numero || "-"}</TableCell>
                     <TableCell className="text-xs sm:text-sm">{pericia.vara}</TableCell>
                     <TableCell className="text-xs sm:text-sm max-w-[120px] truncate">{capitalizeWords(pericia.requerente)}</TableCell>
