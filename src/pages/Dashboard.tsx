@@ -22,7 +22,7 @@ import { useLocation } from "react-router-dom";
 
 export interface FilterState {
   status: string;
-  requerente: string;
+  busca: string;
   vara: string;
   nr15: number[];
   nr16: number[];
@@ -37,9 +37,9 @@ export interface FilterState {
 
 const Dashboard = () => {
   const location = useLocation();
-  const [filters, setFilters] = useState<FilterState>({
+const [filters, setFilters] = useState<FilterState>({
     status: "",
-    requerente: "",
+    busca: "",
     vara: "",
     nr15: [],
     nr16: [],

@@ -32,7 +32,9 @@ const HonorariosRecebidosCard = ({ filters }: HonorariosRecebidosCardProps) => {
       .eq("status", "HONORÁRIOS RECEBIDOS");
 
     if (filters.vara) query = query.eq("vara", filters.vara);
-    if (filters.requerente) query = query.ilike("requerente", `%${filters.requerente}%`);
+    if (filters.busca) {
+      query = query.or(`numero_processo.ilike.%${filters.busca}%,requerente.ilike.%${filters.busca}%,requerido.ilike.%${filters.busca}%,vara.ilike.%${filters.busca}%`);
+    }
     if (filters.nr15.length > 0) query = query.overlaps("nr15", filters.nr15);
     if (filters.nr16.length > 0) query = query.overlaps("nr16", filters.nr16);
 
