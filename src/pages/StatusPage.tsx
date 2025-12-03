@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { formatDateSafe, formatCurrency } from "@/lib/utils";
-import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink, Eye, Pencil, Filter } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink, Eye, Pencil, Filter, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import EditarPericia from "@/components/dashboard/EditarPericia";
 import VisualizarPericia from "@/components/dashboard/VisualizarPericia";
 import HonorariosRecebidosCard from "@/components/dashboard/HonorariosRecebidosCard";
@@ -28,10 +29,13 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [editingPericia, setEditingPericia] = useState<any | null>(null);
   const [viewingPericia, setViewingPericia] = useState<any | null>(null);
+  const [selectedPericias, setSelectedPericias] = useState<Set<string>>(new Set());
+  const [sendingRoute, setSendingRoute] = useState(false);
 
   useEffect(() => {
     checkAuth();
     fetchPericias();
+    setSelectedPericias(new Set());
   }, [status]);
 
   const checkAuth = async () => {
@@ -74,6 +78,75 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
         exactNrMatch: true,
       }
     });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedPericias.size === sortedPericias.length) {
+      setSelectedPericias(new Set());
+    } else {
+      setSelectedPericias(new Set(sortedPericias.map(p => p.id)));
+    }
+  };
+
+  const handleSelectPericia = (id: string) => {
+    const newSelected = new Set(selectedPericias);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedPericias(newSelected);
+  };
+
+  const handleSendRoute = async () => {
+    if (selectedPericias.size === 0) {
+      toast({
+        title: "Nenhuma perícia selecionada",
+        description: "Selecione pelo menos uma perícia para traçar a rota.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingRoute(true);
+    
+    const selectedData = sortedPericias
+      .filter(p => selectedPericias.has(p.id))
+      .map(p => ({
+        numero: p.numero,
+        endereco: p.endereco,
+        numero_processo: p.numero_processo,
+        requerente: p.requerente,
+        data_pericia_agendada: p.data_pericia_agendada,
+        horario: p.horario,
+      }));
+
+    try {
+      const response = await fetch("https://api.uloan.com.br/webhook/rotas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pericias: selectedData }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao enviar rotas");
+      }
+
+      toast({
+        title: "Rotas enviadas com sucesso",
+        description: `${selectedData.length} endereço(s) enviado(s) para o webhook.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar rotas",
+        description: "Não foi possível enviar os endereços para o webhook.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingRoute(false);
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -174,6 +247,12 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
           <>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={sortedPericias.length > 0 && selectedPericias.size === sortedPericias.length}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
                 <SortableHeader field="numero">Nº</SortableHeader>
                 <SortableHeader field="vara">Vara</SortableHeader>
                 <SortableHeader field="requerente">Reclamante</SortableHeader>
@@ -189,6 +268,12 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
             <TableBody>
               {sortedPericias.map((pericia) => (
                 <TableRow key={pericia.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedPericias.has(pericia.id)}
+                      onCheckedChange={() => handleSelectPericia(pericia.id)}
+                    />
+                  </TableCell>
                   <TableCell>{pericia.numero || "-"}</TableCell>
                   <TableCell>{pericia.vara}</TableCell>
                   <TableCell>{pericia.requerente}</TableCell>
@@ -414,8 +499,19 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
       )}
       
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Perícias - {title} ({pericias.length})</CardTitle>
+          {status === "AGUARDANDO PERÍCIA" && (
+            <Button
+              onClick={handleSendRoute}
+              disabled={sendingRoute || selectedPericias.size === 0}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Route className="w-4 h-4" />
+              Traçar Rota {selectedPericias.size > 0 && `(${selectedPericias.size})`}
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
