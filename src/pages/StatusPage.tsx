@@ -398,7 +398,7 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
         <HonorariosRecebidosCard 
           filters={{ 
             status,
-            requerente: "",
+            busca: "",
             vara: "",
             nr15: [],
             nr16: [],

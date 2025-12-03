@@ -74,11 +74,11 @@ const DashboardFilters = ({ filters, setFilters }: DashboardFiltersProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Pesquisar Reclamante</Label>
+          <Label>Buscar</Label>
           <Input
-            placeholder="Digite o nome..."
-            value={filters.requerente}
-            onChange={(e) => setFilters({ ...filters, requerente: e.target.value })}
+            placeholder="Nº processo, reclamante, reclamada, vara..."
+            value={filters.busca}
+            onChange={(e) => setFilters({ ...filters, busca: e.target.value })}
           />
         </div>
 
