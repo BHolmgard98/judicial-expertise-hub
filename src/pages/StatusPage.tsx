@@ -436,6 +436,61 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
           </>
         );
 
+      case "AGENDAR PERÍCIA":
+        return (
+          <>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={sortedPericias.length > 0 && selectedPericias.size === sortedPericias.length}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
+                <SortableHeader field="numero">Nº</SortableHeader>
+                <SortableHeader field="vara">Vara</SortableHeader>
+                <SortableHeader field="requerente">Reclamante</SortableHeader>
+                <SortableHeader field="numero_processo">Processo</SortableHeader>
+                <SortableHeader field="requerido">Reclamada</SortableHeader>
+                <SortableHeader field="data_nomeacao">Data Nomeação</SortableHeader>
+                <TableHead>Endereço</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedPericias.map((pericia) => (
+                <TableRow key={pericia.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedPericias.has(pericia.id)}
+                      onCheckedChange={() => handleSelectPericia(pericia.id)}
+                    />
+                  </TableCell>
+                  <TableCell>{pericia.numero || "-"}</TableCell>
+                  <TableCell>{pericia.vara}</TableCell>
+                  <TableCell>{pericia.requerente}</TableCell>
+                  <TableCell>{renderProcessoLink(pericia)}</TableCell>
+                  <TableCell>{pericia.requerido}</TableCell>
+                  <TableCell>{formatDateSafe(pericia.data_nomeacao)}</TableCell>
+                  <TableCell className="max-w-[200px] truncate" title={pericia.endereco || ""}>
+                    {pericia.endereco || "-"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => setViewingPericia(pericia)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => setEditingPericia(pericia)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </>
+        );
+
       default:
         return (
           <>
@@ -501,7 +556,7 @@ const StatusPage = ({ status, title }: StatusPageProps) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Perícias - {title} ({pericias.length})</CardTitle>
-          {status === "AGUARDANDO PERÍCIA" && (
+          {(status === "AGUARDANDO PERÍCIA" || status === "AGENDAR PERÍCIA") && (
             <Button
               onClick={handleSendRoute}
               disabled={sendingRoute || selectedPericias.size === 0}
