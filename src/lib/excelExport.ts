@@ -5,9 +5,11 @@ interface PericiaExport {
   numero?: number;
   vara: string;
   requerente: string;
+  email_reclamante?: string;
   numero_processo: string;
   link_processo?: string;
   requerido: string;
+  email_reclamada?: string;
   data_nomeacao: string;
   data_prazo?: string;
   data_pericia_agendada?: string;
@@ -83,9 +85,11 @@ export const exportToExcel = async (
     { header: "Nº", key: "numero", width: 8 },
     { header: "Nº Vara", key: "vara", width: 15 },
     { header: "Reclamante", key: "requerente", width: 25 },
+    { header: "Email Reclamante", key: "email_reclamante", width: 30 },
     { header: "Nº Processo", key: "numero_processo", width: 22 },
     { header: "Link Processo", key: "link_processo", width: 40 },
     { header: "Reclamada", key: "requerido", width: 25 },
+    { header: "Email Reclamada", key: "email_reclamada", width: 30 },
     { header: "Data Nomeação", key: "data_nomeacao", width: 15 },
     { header: "Prazo Entrega", key: "data_prazo", width: 15 },
     { header: "Data Perícia", key: "data_pericia_agendada", width: 15 },
@@ -126,9 +130,11 @@ export const exportToExcel = async (
       numero: pericia.numero || "-",
       vara: pericia.vara,
       requerente: pericia.requerente,
+      email_reclamante: pericia.email_reclamante || "-",
       numero_processo: pericia.numero_processo,
       link_processo: pericia.link_processo || "-",
       requerido: pericia.requerido,
+      email_reclamada: pericia.email_reclamada || "-",
       data_nomeacao: pericia.data_nomeacao ? formatDate(pericia.data_nomeacao) : "-",
       data_prazo: pericia.data_prazo ? formatDate(pericia.data_prazo) : "-",
       data_pericia_agendada: pericia.data_pericia_agendada ? formatDate(pericia.data_pericia_agendada) : "-",
