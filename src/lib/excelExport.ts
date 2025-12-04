@@ -6,6 +6,7 @@ interface PericiaExport {
   vara: string;
   requerente: string;
   numero_processo: string;
+  link_processo?: string;
   requerido: string;
   data_nomeacao: string;
   data_prazo?: string;
@@ -83,6 +84,7 @@ export const exportToExcel = async (
     { header: "Nº Vara", key: "vara", width: 15 },
     { header: "Reclamante", key: "requerente", width: 25 },
     { header: "Nº Processo", key: "numero_processo", width: 22 },
+    { header: "Link Processo", key: "link_processo", width: 40 },
     { header: "Reclamada", key: "requerido", width: 25 },
     { header: "Data Nomeação", key: "data_nomeacao", width: 15 },
     { header: "Prazo Entrega", key: "data_prazo", width: 15 },
@@ -125,6 +127,7 @@ export const exportToExcel = async (
       vara: pericia.vara,
       requerente: pericia.requerente,
       numero_processo: pericia.numero_processo,
+      link_processo: pericia.link_processo || "-",
       requerido: pericia.requerido,
       data_nomeacao: pericia.data_nomeacao ? formatDate(pericia.data_nomeacao) : "-",
       data_prazo: pericia.data_prazo ? formatDate(pericia.data_prazo) : "-",
