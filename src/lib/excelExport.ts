@@ -16,6 +16,8 @@ interface PericiaExport {
   horario?: string;
   data_entrega?: string;
   prazo_esclarecimento?: string;
+  data_esclarecimento?: string;
+  data_recebimento?: string;
   status?: string;
   nr15?: number[];
   nr16?: number[];
@@ -96,6 +98,8 @@ export const exportToExcel = async (
     { header: "Horário", key: "horario", width: 12 },
     { header: "Data Entrega", key: "data_entrega", width: 15 },
     { header: "Prazo Esclarec.", key: "prazo_esclarecimento", width: 15 },
+    { header: "Data Esclarec.", key: "data_esclarecimento", width: 15 },
+    { header: "Data Recebimento", key: "data_recebimento", width: 15 },
     { header: "Status", key: "status", width: 20 },
     { header: "NR15", key: "nr15", width: 20 },
     { header: "NR16", key: "nr16", width: 20 },
@@ -141,6 +145,8 @@ export const exportToExcel = async (
       horario: pericia.horario || "-",
       data_entrega: pericia.data_entrega ? formatDate(pericia.data_entrega) : "-",
       prazo_esclarecimento: pericia.prazo_esclarecimento ? formatDate(pericia.prazo_esclarecimento) : "-",
+      data_esclarecimento: pericia.data_esclarecimento ? formatDate(pericia.data_esclarecimento) : "-",
+      data_recebimento: pericia.data_recebimento ? formatDate(pericia.data_recebimento) : "-",
       status: pericia.status || "-",
       nr15: pericia.nr15 ? pericia.nr15.join(", ") : "-",
       nr16: pericia.nr16 ? pericia.nr16.join(", ") : "-",
