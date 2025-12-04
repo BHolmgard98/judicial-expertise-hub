@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      enderecos_salvos: {
+        Row: {
+          created_at: string
+          endereco: string
+          id: string
+          is_default: boolean | null
+          nome: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          endereco: string
+          id?: string
+          is_default?: boolean | null
+          nome: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          endereco?: string
+          id?: string
+          is_default?: boolean | null
+          nome?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enderecos_salvos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pericias: {
         Row: {
           cidade: string | null
@@ -134,6 +172,8 @@ export type Database = {
           email_notificacoes: string | null
           id: string
           nome_perito: string | null
+          telefone: string | null
+          tenant_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -141,6 +181,8 @@ export type Database = {
           email_notificacoes?: string | null
           id: string
           nome_perito?: string | null
+          telefone?: string | null
+          tenant_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -148,6 +190,90 @@ export type Database = {
           email_notificacoes?: string | null
           id?: string
           nome_perito?: string | null
+          telefone?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          nome_fantasia: string | null
+          owner_id: string | null
+          plano_atual: string | null
+          settings: Json | null
+          slug: string
+          status_pagamento: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          nome_fantasia?: string | null
+          owner_id?: string | null
+          plano_atual?: string | null
+          settings?: Json | null
+          slug: string
+          status_pagamento?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          nome_fantasia?: string | null
+          owner_id?: string | null
+          plano_atual?: string | null
+          settings?: Json | null
+          slug?: string
+          status_pagamento?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -160,6 +286,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      app_role: "admin" | "manager" | "member"
       pericia_status:
         | "Aguardando"
         | "Em andamento"
@@ -306,6 +433,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "manager", "member"],
       pericia_status: [
         "Aguardando",
         "Em andamento",
